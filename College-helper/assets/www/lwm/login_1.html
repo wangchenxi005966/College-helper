@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <style type="text/css">        
+            .circle {
+                position: relative;
+                width: 60px;
+                height: 67px;
+                -webkit-border-radius: 7px;
+                border-radius: 7px;
+                margin-top: 6px;
+                margin-left: 0px;
+                margin-right: 0px;
+                padding: 0px;
+            }
+            
+            .login_content {
+                /* background: url(image/background.jpg);*/
+            }
+            
+            .login_form {
+                margin-top: 45px;
+                width: 375px;
+                height: 332px;
+                background-image: url(image/login_background.png);
+                background-repeat: no-repeat;
+                padding: 0px;
+                border: 0px;
+            }
+            
+            .input_email {
+                margin-top: 39px;
+                margin-right: 40px;
+                width: 272px;
+                height: 36px;
+                border: 0px;
+                padding: 0px;
+                background: transparent;
+                font-size: 18px;
+            }
+            
+            .input_passwd {
+                margin-top: 10px;
+                margin-right: 40px;
+                width: 272px;
+                height: 36px;
+                border: 0px;
+                padding: 0px;
+                background: transparent;
+                font-size: 18px;
+            }
+            
+            #submit {
+                width: 100px;
+                background: -webkit-gradient(linear,left top,left bottom,from(#75c92a),to(#71c228));
+				border: 1px solid #40a217;
+				-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.13),inset 0 1px 1px #9ed74a;
+				box-shadow: 0 1px 1px rgba(0,0,0,0.13),inset 0 1px 1px #9ed74a;
+		        display: block;
+		        -moz-border-radius: 4px;
+		        -webkit-border-radius: 4px;
+		        border-radius: 4px;
+		        font-weight: bold;
+		        clear: left;
+				height:45px;
+				line-height:45px;
+				text-align:center;
+		     }  
+	        /*background-position: 6px -21px;*/       
+                    
+        </style>
+    </head>
+    <body>
+        <div id="login_page" class="login_content">
+            <div align="center">
+                <div class="login_form" align="center">
+                    <img src="image/default.png" class="circle" id="login_touxiang">
+					<input data-role="none" class="input_email" type="email" id="email" name="email" placeholder="请输入邮箱">
+					<input data-role="none" class="input_passwd" type="password" id="passwd" name="passwd" placeholder="请输入密码">
+                    <div style="margin-top:60px;width:100%;height:45px;">
+                        <table style="width:100%">
+                            <tr>
+                                <td width='50%' align="center">
+                                    <a id="submit" data-role="button">没有账号></a>
+                                </td>
+                                <td width='50%' align="center">
+                                    <a id="submit" data-role="button">登陆</a>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>

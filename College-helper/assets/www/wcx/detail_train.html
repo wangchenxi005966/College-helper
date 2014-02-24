@@ -1,0 +1,46 @@
+<meta charset="utf-8">
+<div data-role="page" id="train">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $.getJSON("http://college-helper-server.wicp.net/detail_train.php?callback=?", function(data){
+                $.each(data, function(infoIndex, info){
+                    var num = getLineNum();
+                    $("#infomation").append("<tr><td>" + num + "</td><td>" + info["name"] + "</td><td>" +
+                    info["switch"] +
+                    "</td></tr>");
+                });
+            });
+        });
+        
+        function getLineNum(){
+            max_line_num = $("#infomation tr:last-child").children("td").html();
+            if (max_line_num == null) {
+                max_line_num = 1;
+            }
+            else {
+                max_line_num = parseInt(max_line_num);
+                max_line_num += 1;
+            }
+            return max_line_num;
+        }
+    </script>
+    <div data-role="header" data-theme="a" data-position="fixed">
+        <a href="tran.html" data-transition="slide" data-role="button" data-inline="true" data-icon="back">返回</a>
+        <h2>校园助手</h2>
+    </div>
+    <div data-role="content">
+        <h3 style="text-align:center">地铁11号线线路</h3>
+        <table width="90%">
+            <tr>
+                <td>序号</td>
+                <td>站名</td>
+                <td>换乘</td>
+            </tr>
+        </table>
+        <table style="text-align:center" border="1" width="100%" id="infomation">
+        </table>
+    </div>
+    <div data-role="footer" data-theme="a" data-position="fixed" data-tap-toggle="false">
+        
+    </div>
+</div>

@@ -1,0 +1,192 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_course_list">
+	<script type="text/javascript">
+		$("#m_course_list").bind("pageinit",function(){
+			//先找到整条数据信息
+			var time=sessionget("course_time");
+			var week=sessionget("weektype");
+			var course_list=stringtojson(ssenvoyget("course"));
+			var cur_course=stringtojson(search(time,week,course_list));//json格式
+			//对应输出
+			$("#coursename").html(cur_course.name);
+			$("#courseroom").html(cur_course.classroom);
+			$("#coursetime").html(cur_course.time);
+			$("#courseinfo").html(cur_course.week);
+			$("#teachername").html(cur_course.teacher_name);
+			$("#teachertel").html(cur_course.teacher_tel);
+			$("#teachermail").html(cur_course.teacher_mail);
+			$("#zhujiaoname").html(cur_course.zhujiao_name);
+			$("#zhujiaotel").html(cur_course.zhujiao_tel);
+			$("#zhujiaomail").html(cur_course.zhujiao_mail);
+			$("#allinfo").html(cur_course.beizhu);
+		});
+		/*
+		删除课程
+		*/
+		function delete_course(){
+			var user=ssenvoyget("user");
+			var course_json=stringtojson(ssenvoyget("course"));
+			var num=get_num($("#coursetime").html(),$("#courseinfo").html(),course_json);
+			var course_js=stringtojson(course_json[num]);
+
+			if(course_js.syn!="0"){//直接删除
+				course_json.splice(num,1);
+			}
+			else{//标记为删除，删除数据库中的数据
+				course_js.syn="del";
+				var course_str=jsontostring(course_js);
+				course_json.splice(num,1,course_str);
+			}
+			ssenvoyset("course",jsontostring(course_json));
+			goTo("m_course_index.html");
+		}
+	</script>
+	<style type="text/css">
+		p{ word-wrap:break-word; word-break:normal; }
+		.ui-li-desc { white-space: normal; margin-right: 0px;word-break:break-all; word-wrap:break-word ; }
+	</style>
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<a href="m_course_index.html" data-direction="reverse" data-icon="back" data-transition="slide">返回</a>
+		<h3 id="title">课程信息</h3>
+	</div>
+	<div data-role="content" >
+		<ul data-role="listview" style="margin-top:0px;margin-bottom:10px;" data-divider-theme="b" data-inset="true" >
+			<li data-theme="d" data-icon="false" >
+				<table width="100%">
+					<tr width="100%">
+						<td width="30%" style="border-bottom:3px solid #EAC100;"><p><img src="images/src/home.png"
+					class="ui-li-icon"><span style="margin-left:10px;color:#64A600">课程信息</span></p>
+						</td>
+						<td width="70%" align="right" style="border-bottom:3px solid #EAC100;">
+							<a href="m_course_edit_base.html" data-icon="back" data-transition="slide">编辑</a>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%">
+						</td>
+						<td width="70%">
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">名称</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="coursename" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">教室</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="courseroom" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">时间</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="coursetime" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">周次</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="courseinfo" style="color:#D200D2"></p>
+						</td>
+					</tr>
+				</table>
+			</li>
+		</ul>
+
+		<ul data-role="listview" data-divider-theme="b" data-inset="true" style="margin-top:0px;margin-bottom:10px;">
+			<li data-theme="d" data-icon="false" >
+				<table width="100%">
+					<tr width="100%">
+						<td width="30%" style="border-bottom:3px solid #EAC100;"><p><img src="images/src/teacher.png"
+					class="ui-li-icon"><span style="margin-left:10px;color:#64A600">教师信息</span></p>
+						</td>
+						<td width="70%" align="right" style="border-bottom:3px solid #EAC100;">
+							<a href="m_course_edit_teacher.html" data-icon="back" data-transition="slide">编辑</a>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%">
+						</td>
+						<td width="70%">
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">老师姓名</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="teachername" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">老师电话</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="teachertel" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">老师邮箱</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="teachermail" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">助教姓名</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="zhujiaoname" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">助教电话</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="zhujiaotel" style="color:#D200D2"></p>
+						</td>
+					</tr>
+					<tr>
+						<td width="30%"><p><span style="margin-left:10px;">助教邮箱</span></p>
+						</td>
+						<td width="70%" align="right">
+							<p id="zhujiaomail" style="color:#D200D2"></p>
+						</td>
+					</tr>
+				</table>
+			</li>
+		</ul>
+		<ul data-role="listview" data-divider-theme="b" data-inset="true" style="margin-top:0px;margin-bottom:10px;">
+			<li data-theme="d" data-icon="false" >
+				<table width="100%">
+					<tr width="100%">
+						<td width="100%">
+							<table width="100%">
+								<tr>
+									<td width="30%" style="border-bottom:3px solid #EAC100;">
+										<p><img src="images/src/icon_notice.png"
+					class="ui-li-icon"><span style="margin-left:10px;color:#64A600">备注信息</span>
+									</td>
+									<td width="70%" align="right" style="border-bottom:3px solid #EAC100;">
+										<a href="m_course_edit_beizhu.html" data-icon="back" data-transition="slide">编辑</a>
+									</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td width="100%" style="padding-top:10px;padding-left:5px;">
+							<p id="allinfo" style="color:#D200D2"></p>
+						</td>
+					</tr>
+				</table>
+			</li>
+		</ul>
+		<a data-role="button" onclick="delete_course()" style="background:#FF0000;margin-top:30px;color:#FFFFFF;margin-left:2%;margin-right:2%;margin-top:10px;" data-transition="slide">删除课程</a>
+	</div>
+</div>

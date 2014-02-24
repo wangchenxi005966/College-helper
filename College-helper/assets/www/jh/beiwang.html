@@ -1,0 +1,70 @@
+<div data-role="page" id="beiwang" data-theme="e">
+    <script type="text/javascript">
+        $(document).one("pageinit", function(){
+			var isnull=0;
+            if (ssenvoyget("event_of_beiwang") != null) {
+                var event_of_beiwang = To_Json(stringtojson((ssenvoyget("event_of_beiwang"))));
+                var i = 0;
+                while (event_of_beiwang[i]) {
+                    if (event_of_beiwang[i].delflag != 1) {
+                        var date = new Date(event_of_beiwang[i].start_time);
+                        var now = new Date();
+                        if (date < now) {
+                            var date_time = date.getTime() + (event_of_beiwang[i].repeat * 1000 * 3600 * 24);
+                            var date1 = new Date(date_time);
+                            event_of_beiwang[i].start_time = date1.format("yyyy/MM/dd") + " " + date1.format("hh:mm");
+                            ssenvoyset("event_of_beiwang", jsontostring(To_String(event_of_beiwang)));
+                        }
+                        if (date > now) {
+							if(isnull==0)
+							{
+								$("#list").append("<li data-role=\"list-divider\">备忘列表</li>");
+							}
+							isnull++;
+                            var li = document.createElement("li");
+                            var a = document.createElement("a");
+                            var span = document.createElement("span");
+                            span.style.fontSize = "smaller";
+                            a.setAttribute("href", "event.html?id=2&position="+i);
+                            a.setAttribute("id", i);
+							
+                            a.innerHTML = "<p style='font-size:18px'>" + event_of_beiwang[i].event_name + "</p>";
+                            span.innerHTML = date.format("yyyy/MM/dd") + " " + date.format("hh:mm");
+                            a.appendChild(span);
+                            li.appendChild(a);
+                            var element = document.getElementById("list");
+                            element.appendChild(li);
+                            
+                        }
+                    }
+                    i++;  
+                }
+				$("#list").listview('refresh');
+            }
+        });
+    </script>
+    <div data-role="header">
+        <a href="beiwang_overdue.html" data-role="button" data-transition="slideup">过期</a>
+        <h6>事件备忘</h6>
+        <a href="beiwang_add.html" data-role="button" data-transition="slideup" data-icon="Plus">添加</a>
+    </div>
+    <div data-role="content">
+        <ul data-role="listview" id="list" data-theme="e" data-inset="true">
+        </ul>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="beiwang">
+        <div data-role="navbar">
+            <ul>
+                <li>
+                    <a href="jh_index.html">事项</a>
+                </li>
+                <li>
+                    <a href="beiwang.html" class="ui-btn-active ui-state-persist" data-inline="true">备忘</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+

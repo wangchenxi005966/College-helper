@@ -1,0 +1,178 @@
+<meta charset="utf-8">
+<div data-role="page" id="inputPage" data-theme="d">
+    <style type="text/css">
+        .upload-img {
+            width: 100%;
+            height: auto;
+            text-align: center;
+        }
+        
+        .upload-img img {
+            margin: auto;
+            max-width: 370px;
+            width: 90%;
+            height: auto;
+        }
+        
+        .seleced-user-head-img {
+            width: 100%;
+            height: auto;
+            text-align: center;
+        }
+        
+        .seleced-user-head-img img {
+            max-width: 370px;
+            width: 90%;
+            height: auto;
+            border-radius: 15px;
+            border: 2px solid #000000;
+        }
+    </style>
+    <script type="text/javascript" charset="utf-8">
+        document.addEventListener("deviceready", onDeviceReady, false);
+        var pictureSource; //  getPicture:数据来源参数的一个常量  
+        var destinationType; // getPicture中：设置getPicture的结果类型  
+        function onDeviceReady(){
+            pictureSource = navigator.camera.PictureSourceType;
+            destinationType = navigator.camera.DestinationType;
+        }
+        
+		var count = 0;//定义最大上传次数
+        var pickUrl;
+        function fromCamera(source){
+            navigator.camera.getPicture(function(imageURI){
+                var largeImage = document.getElementById('smallImage');
+                largeImage.style.display = 'block';
+                largeImage.src = imageURI;
+                pickUrl = imageURI;
+            }, function(){
+                console.log('加载相册出错!');
+            }, {
+                quality: 50,
+                destinationType: destinationType.FILE_URI,
+                sourceType: source
+            });
+        }
+        
+        /*********上传图片***************/
+        function uploadFile(){
+            showLoading();
+            $("#submitButton").button("disable");
+            $("#submitButton").button("refresh");
+            var imageURI = pickUrl;
+            if (!imageURI) {
+                saveText(); //没有上传图片，则利用ajax方式保存数据
+                return;
+            }           
+            var gotFileName = function(fileEntry){
+                var str = fileEntry.fullPath;
+                var FileName = str.substr(str.lastIndexOf('/') + 1); //获取文件名               
+                FileName = FileName.substr(FileName.lastIndexOf('.')); //获取后缀名
+                FileName = new Date().getTime() + FileName;//上传文件名
+                var options = new FileUploadOptions();
+                options.fileKey = "file";
+                options.chunkedMode = false;
+                options.fileName = FileName;
+                options.mimeType = "image/jpeg";
+                
+                //绑定操作的参数
+                var params = new Object();
+                var personinfo = ssenvoyget("personinfo");
+				personinfo = stringtojson(personinfo);
+				params.username = personinfo.username;
+                params.content = $("#content").val();
+				params.email = personinfo.email;
+                options.params = params;
+                
+                var ft = new FileTransfer();
+                ft.upload(imageURI, encodeURI("http://college-helper-server.wicp.net/upload_file.php"), function(result){
+                    pickUrl = null;
+					hideLoading();
+                    $("#submitButton").button("enable");
+                    $("#submitButton").button("refresh");
+                    var response = stringtojson(result.response);
+                    if (response[0].error == "false") {
+                        $.mobile.changePage("dialog.html", {
+                            role: "dialog",
+                            transition: "slidedown"
+                        });
+                    }
+                    else {
+                        showloading(response[0].message);
+                        hideloading();
+                    }
+                }, function(error){
+                    hideLoading();
+                    $("#submitButton").button("enable");
+                    $("#submitButton").button("refresh");
+					count++;
+					if (count < 5) {
+						uploadFile();
+					}else{
+						myAlert("上传失败，换一张小图片试试");
+					}
+                    console.log("upload error source " + error.source);
+                    console.log("upload error target " + error.target);
+                }, options);
+            }
+            var fsFail = function(){
+                alert("获取失败");
+            };
+            window.resolveLocalFileSystemURI(imageURI, gotFileName, fsFail);
+        }       
+        
+        //未上传图片，ajax请求
+        function saveText(){
+            showLoading();
+			var personinfo = ssenvoyget("personinfo");
+			personinfo = stringtojson(personinfo);
+			var name = personinfo.username;
+            var content = $("#content").val();
+			var email = personinfo.email;
+            var param = {
+                "username": encodeURIComponent(name),
+                "inputContent": encodeURIComponent(content),
+				"email":encodeURIComponent(email)
+            }
+            $.ajax({
+                async: false,
+                url: "http://college-helper-server.wicp.net/upload_file.php",
+                type: 'post',
+                dataType: 'jsonp',
+                jsonp: "callback",//返回的数据类型
+                data: param,
+                timeout: 5000,
+                success: function(data){
+                    hideLoading();
+                    if ("ok" == data.value) { //执行成功，返回ok信息
+                        $.mobile.changePage("dialog.html", {
+                            role: "dialog",
+                            transition: "slidedown"
+                        });
+                    }
+                    else {
+                        myAlert("发布失败");
+                    }
+                },
+                error: function(msg){//请求出错处理
+                    hideLoading();
+                    myAlert("请求出错(请检查相关网络状况.)");
+                }
+            });
+        }		
+    </script>
+    <div data-role="header" data-theme="a">
+        <a href="index.html" data-transition="slide" data-role="button" data-inline="true" data-icon="back">返回</a>
+        <h1>发布</h1>
+    </div>
+    <div data-role="content" data-theme="d">
+        <textarea name="textarea" name="content" id="content" placeholder="内容"></textarea>
+        <a href="javascript:fromCamera(pictureSource.PHOTOLIBRARY)" data-role="button">上传图片</a>
+        <div class="upload-img">
+            <img id="smallImage" src="" />
+        </div>
+        <button onclick="uploadFile()" id="submitButton" data-theme="a">
+            提交
+        </button>
+    </div>
+</div>

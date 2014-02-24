@@ -1,0 +1,100 @@
+<div data-role="page" id="register_page">
+    <script type="text/javascript">
+        var ErrorInfo;
+        $(document).one("pageinit", function(){
+            $("#reset").click(function(){
+                $("#reg_username").val("");
+                $("#reg_passwd").val("");
+                $("#reg_email").val("");
+            });
+            
+            $("#register").click(function(){
+                var username = $("#reg_username").val();
+                if (username == null || username == "") {
+                    alert("昵称不能为空！");
+                    return;
+                }
+                var passwd = $("#reg_passwd").val();
+                if (passwd == null || passwd == "") {
+                    alert("密码不能为空！");
+                    return;
+                }
+                var email = $("#reg_email").val();
+                if (email == null || email == "") {
+                    alert("邮箱不能为空！");
+                }
+                var emailPattern = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                if (!emailPattern.test(email)) {
+                    alert("邮箱格式错误！");
+                    return;
+                }
+                
+                showloading("注册中······");
+                $.getJSON("http://college-helper-server.wicp.net/register_handler.php?callback=?", {
+                    "username": username,
+                    "email": email,
+                    "passwd": passwd
+                }).done(function(data){
+                    if (data.value == "true") {
+                        setTimeout("showloading(\"注册成功！\")", 500);
+                        setTimeout("hideloading()", 1000);
+                        setTimeout("$.mobile.changePage('login.html', 'fade')", 1100);
+                        return;
+                    }
+                    ErrorInfo = data.info;
+                    setTimeout("showloading(ErrorInfo)", 500);
+                    setTimeout("hideloading()", 1500);
+                }).fail(function(){
+                    setTimeout("showloading('网络错误')", 500);
+                    setTimeout("hideloading()", 1500);
+                });
+                
+            });
+        });
+    </script>
+    <style type="text/css">
+        .star {
+            color: red;
+        }
+    </style>
+    <div data-role="header">
+        <a href="login.html" data-transition="fade" data-direction="reverse" data-icon="back" class="font-chinese">登陆</a>
+        <h3 class="font-chinese">注册页面</h3>
+    </div>
+    <div data-role="content">
+        <ul data-role="listview" data-inset="true">
+            <li data-role="fieldcontain">
+                <label for="reg_username">
+                    昵称<span class="star">*</span>
+                </label>
+                <input type="text" id="reg_username" name="reg_username" data-clear-btn="true" value="">
+            </li>
+            <li data-role="fieldcontain">
+                <label for="reg_passwd">
+                    密码<span class="star">*</span>
+                </label>
+                <input type="password" name="reg_passwd" id="reg_passwd" data-clear-btn="true" value="" required>
+            </li>
+            <li data-role="fieldcontain">
+                <label for="reg_email" data-mini="true">
+                    邮件<span class="star">*</span>
+                </label>
+                <input type="email" name="reg_email" id="reg_email" data-clear-btn="true" value="" required>
+            </li>
+            <li class="ui-body ui-body-b">
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <button id="reset" data-theme="d">
+                            重置
+                        </button>
+                    </div>
+                    <div class="ui-block-b">
+                        <button id="register" data-theme="a">
+                            提交
+                        </button>
+                    </div>
+                </fieldset>
+            </li>
+        </ul>
+    </div>
+</div>

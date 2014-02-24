@@ -1,0 +1,62 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_food_address_old">
+	<script type="text/javascript">
+		$("#m_food_address").on("pageinit",function()
+		{
+			if(ssenvoyget("address")!=null)
+			{
+				alert(ssenvoyget("address"));
+				$("input[type=radio]").remove();
+				/* $("#m_receive_address").page();
+				$("input[type=radio]").attr('checked',true).checkboxradio('refresh'); */
+				var address_list=stringtojson(ssenvoyget("address"));
+				var append_val="";
+				$.each(address_list,function(infoIndex,info){
+					alert(info);
+					append_val+='<input id="radio1" name="" value="" data-theme="c" type="radio">'+
+                		'<label for="radio1">'+info+'</label>';
+				});
+				$("#control_group").append(append_val);
+				$("#m_food_address").page();
+				$("#control_group").checkboxradio();
+				/*$("input[value=grid]").attr('checked',true).checkboxradio('refresh');
+
+				$("input[type=radio]").checkboxradio();
+				$("#m_food_address").checkboxradio("refresh");*/
+			}
+			$("#enter").click(function(){
+				ssenvoyset("address_choosed",$('input[id="control_group"]:checked').val());
+				alert(ssenvoyget("address_choosed"));
+			});
+		});
+	</script>
+	<div data-theme="a" data-role="header">
+		<h3 id="title">外卖接收地址</h3>
+	</div>
+	<div data-role="content">
+		<div data-role="fieldcontain">
+            <fieldset data-role="controlgroup" data-type="vertical" id="control_group">
+                <!--<legend>
+                    外卖接收地址
+                </legend>-->
+            </fieldset>
+        </div>
+        <div class="ui-grid-a">
+            <div class="ui-block-a">
+                <a data-role="button" data-theme="e" href="m_address_add.html" data-transition="slide" id="add">
+                    自定义
+                </a>
+            </div>
+            <div class="ui-block-b">
+                <a data-role="button" data-theme="e" href="m_food_order.html" data-transition="slide" id="enter">
+                    确定
+                </a>
+            </div>
+        </div>
+	</div>
+	<div data-theme="a" data-role="footer" data-position="fixed">
+		
+	</div>
+</div>
+
+

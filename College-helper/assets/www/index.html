@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>首页</title>
+		<meta charset="utf-8">
+		<meta name="viewport"
+			content="width=device-width,initial-scale=1,user-scalable=no">
+		<link rel="stylesheet" href="css/jquery.mobile-1.3.2.min.css">
+		<link rel="stylesheet" href="css/iscroll.css">
+		<link rel="stylesheet" href="jh/css/jh.css">
+		<link rel="stylesheet" href="mobiscroll/css/mobiscroll.custom-2.6.2.min.css">
+		<script src="js/jquery-1.9.1.min.js"></script>
+		<script src="js/cordova.js"></script>
+		<script src="js/jquery.mobile-1.3.2.min.js"></script>
+		<script src="js/common.js"></script>
+		<script src="js/emailAutoComplete.js"></script>
+		<script src="mobiscroll/js/mobiscroll.custom-2.6.2.min.js"></script>
+		<script src="js/iscroll.js"></script>
+		<script src="lwm/js/global.js"></script>
+		<script src="lwm/js/when.js"></script>
+		<script src="mq/course_common.js"></script>
+		<script src="jh/js/commom.js"></script>
+		<script src="jh/js/jh.js"></script>
+		<script src="homepage/js/global.js"></script>
+		<script src="jh/js/statusbarnotification.js"></script>
+        <script src="js/emailAutoComplete.js"></script>
+		<script type="text/javascript">
+			checkdate();
+			setInterval("checkdate()", 60000);
+			
+			$(function() {
+				document.addEventListener("deviceready", onDeviceReady, false);	
+				var page_height=$("body").height();
+				var page_width=$("body").width();
+				//alert(page_height+" "+page_width);
+				$(".m_content").css("background-size",page_width+"px "+page_height+"px");		
+			});
+			
+			$(document).on("pagebeforeshow",function(){
+				if(sessionget("updatefood")==null||sessionget("updatefood")==0)
+				{
+					uploads();
+					sessionset("updatefood",1);
+				}
+				if(sessionget("updatecourse")==null||sessionset("updatecourse")==0)
+				{
+					if(ssenvoyget("personinfo")!=null)
+					{
+						uploadCourse();
+						sessionset("updatecourse",1);
+					}
+				} 
+			});
+			// PhoneGap加载完毕
+			function onDeviceReady() {
+				//按钮事件
+				document.addEventListener("backbutton", eventBackButton, false); //返回键
+				create_dir();
+			}
+			
+			
+			function setting()
+			{
+				var login=ssenvoyget("login");
+				if(login=="true")
+				{
+					$.mobile.changePage("lwm/setting.html");
+				}
+				else{
+					var confir=confirm("你还未登陆，是否登陆？");
+					if(confir)
+					{
+						$.mobile.changePage("lwm/login.html");
+					}
+				}
+			}
+
+			//返回键
+			function eventBackButton() {
+				if($.mobile.activePage.is("#demo-page")){
+					var r = confirm("是否退出？");
+					if (r == true) {
+						navigator.app.exitApp();
+					}
+				} 
+				else if($.mobile.activePage.is("#setting_page")){
+					goTo("../index.html");
+				}
+				else if($.mobile.activePage.is("#m_food_order")){
+					ssenvoyremove("food_order");
+					goTo("../index.html");
+				} 
+				else if($.mobile.activePage.is("#m_course_index")){
+					goTo("../index.html");
+				}
+				else if($.mobile.activePage.is("#m_course_list")){
+					goTo("m_course_index.html");
+				}  
+				else if($.mobile.activePage.is("#m_show_notice")){
+					goTo("../index.html");
+				}
+				else if($.mobile.activePage.is("#m_food_shop")){
+					goTo("../index.html");
+				} 
+				else if($.mobile.activePage.is("#login_page")){
+					goTo("../index.html");
+				}				
+				else {
+					navigator.app.backHistory();
+				}
+			}
+			function goTo(page) {
+				$.mobile.changePage(page, {
+					transition : "slide"
+				});
+			}
+			function setsession()
+			{
+				sessionset("init",1);
+				sessionset("iscroll",0);
+			}
+			
+			function setweek()
+			{
+				//设置今日是第几周
+				var today = new Date();
+				var start = new Date("2014/2/24");
+				var date3 = today.getTime()-start.getTime();
+				var days = Math.floor(date3/(7*24*3600*1000))+1;
+				sessionset("week",days);
+				var login = ssenvoyget("login");
+				if(login == "true")
+				{
+					goTo("mq/m_course_index.html");
+				}
+				else{
+					var confir = confirm("你还未登陆，是否登陆？");
+					if(confir)
+					{
+						goTo("lwm/login.html");
+					}
+					else{
+						return;
+					}
+				}
+			}
+		
+			//更新菜单
+			function uploadCourse()
+			{
+				var userinfo=stringtojson(ssenvoyget("personinfo"));
+				var user=userinfo.email;
+				if(ssenvoyget("course")==null){
+					$.getJSON("http://college-helper-server.wicp.net/get_web_course.php?course=nul&ope=get&user="+user+"&callback=?").done(function(data){
+						handleCourse(data);
+					});
+				}
+			}
+			function handleCourse(data)
+			{
+				var course_info_array=new Array();
+				$.each(data, function(infoIndex, info) {
+					course_info_array.push(jsontostring({"time":info["time"],
+						"name":info["name"],"week":info["week"],
+						"classroom":info["classroom"],
+						"teacher_name":info["teacher_name"],"teacher_tel":info["teacher_tel"],
+						"teacher_mail":info["teacher_mail"],"zhujiao_name":info["zhujiao_name"],
+						"zhujiao_tel":info["zhujiao_tel"],"zhujiao_mail":info["zhujiao_mail"],
+						"beizhu":info["beizhu"],"syn":"0","old_time":"","old_week":""}));
+				});
+				ssenvoyset("course",jsontostring(course_info_array));
+			}
+			
+			function uploads()
+			{
+				if(ssenvoyget("food_tag")!=null){
+					$.getJSON("http://college-helper-server.wicp.net/get_web_food.php?food="+ssenvoyget("food_tag")+"&callback=?").done(function(data){
+						modifyDate(data);
+					});
+				}
+				else{
+					$.getJSON("http://college-helper-server.wicp.net/get_web_food.php?food=update&callback=?").done(function(data){
+						handleDate(data);
+					});
+				}
+			}
+		</script>	
+		<style type="text/css">
+			a{ text-decoration:none; } 
+			.m_content{
+				background:url(images/background.jpg) no-repeat;
+			}
+			.ui-navbar-custom .ui-btn .ui-btn-inner { font-size: 11px!important; padding-top: 32px!important; padding-bottom: 0px!important; }
+			.ui-navbar-custom .ui-btn .ui-icon { width: 30px!important; height: 20px!important; margin-left: -15px!important; box-shadow: none!important; -moz-box-shadow: none!important; -webkit-box-shadow: none!important; -webkit-border-radius: none !important; border-radius: none !important; }
+			#college_notice .ui-icon { background:  url(mq/images/src/info.png) 50% 50% no-repeat; background-size: 32px 32px; }
+			#person_center .ui-icon { background:  url(mq/images/src/assistant.png) 50% 50% no-repeat; background-size: 32px 32px; }
+			
+		</style>
+	</head>
+	<body>
+		<div data-role="page" id="demo-page" data-url="demo-page" data-position="fixed" class="m_content">
+			<div data-role="header" data-position="fixed" data-tap-toggle="false">
+				<h2>校园助手</h2>
+			</div>
+			<div data-role="content" >
+				<div class="ui-grid-a">
+	                <div class="ui-block-a" align="center">
+	                        <a href="mq/m_food_shop.html" data-transition="slide">
+	                            <img src="mq/images/src/food.png" style="height:128px;width:128px;">
+	                            <p style="color:black">校园外卖</p>
+	                        </a>
+	                </div>
+	                <div class="ui-block-b" align="center">
+	                        <a href="wcx/tran.html" data-transition="slide">
+	                            <img src="mq/images/src/travel.png">
+	                            <p style="color:black">交通查询</p>
+	                        </a>
+	                </div>
+	                <div class="ui-block-a" align="center">
+	                        <a href="#" onclick="setweek()" data-transition="slideup">
+	                            <img src="mq/images/src/study.png">
+	                            <p style="color:black">课表查看 </p>
+	                        </a>
+	                </div>
+	                <div class="ui-block-b" align="center">
+	                        <a href="jh/jh_index.html">
+	                            <img src="mq/images/src/plan.png" >
+	                            <p style="color:black">计划任务</p>
+	                        </a>
+	                </div>  
+	            </div>
+			</div>
+			<div data-role="footer" data-position="fixed" class="ui-navbar-custom" data-tap-toggle=”false”>
+		        <div data-role="navbar" class="ui-navbar-custom">
+		            <ul>
+		                <li >
+		                    <a href="mq/m_show_notice.html" data-transition="slide" onclick="setsession()" id="college_notice" data-icon="custom">学院通知</a>
+		                </li>
+		                <li>
+		                    <a href="#" data-transition="slide" data-icon="custom" id="person_center" onclick="setting()">个人中心</a>
+		                </li>
+		            </ul>
+		        </div>
+		    </div>
+		</div>
+	</body>
+</html>

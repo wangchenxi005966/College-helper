@@ -1,0 +1,242 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_course_index">
+	<script type="text/javascript">	
+		$(document).one("pageinit",function(){
+			setheight();
+			pageinit();
+		});
+		/*
+		进入该页面初始化数据
+		*/
+		function pageinit()
+		{
+			if(ssenvoyget("course")!=null)
+			{
+				var course_list=stringtojson(ssenvoyget("course"));
+				$.each(course_list,function(infoIndex,info)
+				{
+					var vals=stringtojson(info);
+					if((vals.week==convertweek(sessionget("week"))||vals.week=="1-17周")&&vals.syn!="del")
+					{
+						$("#"+convert(vals.time)+"title").html(vals.name);
+						$("#"+convert(vals.time)+"room").html(vals.classroom);
+					}
+				});
+				update();
+			}
+			var show_week="第"+sessionget("week")+"周";
+			$("#titleweek").html(show_week);
+		}
+		function update()
+		{
+			if(checkInternet())
+			{	
+				var course_list=stringtojson(ssenvoyget("course"));
+				var userinfo=stringtojson(ssenvoyget("personinfo"));
+				var user=userinfo.email;
+				for(var i=0;i<course_list.length;i++){
+					var course_json=stringtojson(course_list[i]);
+					if(course_json.syn!="0"){
+						var course_id="http://college-helper-server.wicp.net/get_web_course.php";
+						switch (course_json.syn)
+						{
+						case "uplode":
+							$.getJSON(course_id+"?course="+course_list[i]+"&ope=uplode&user="+user+"&callback=?", function(data){
+								if(data.value==1)
+								{
+									course_json.syn="0";
+									course_list[i]=jsontostring(course_json);
+									ssenvoyset("course",jsontostring(course_list));
+								}
+							});
+							break;
+						case "update":
+							$.getJSON(course_id+"?course="+course_list[i]+"&ope=update&user="+user+"&callback=?", function(data){
+								if(data.value==1)
+								{
+									course_json.syn="0";
+									course_list[i]=jsontostring(course_json);
+									ssenvoyset("course",jsontostring(course_list));
+								}
+							});
+							break;
+						case "del":
+							$.getJSON(course_id+"?course="+course_list[i]+"&ope=del&user="+user+"&callback=?", function(data){
+								if(data.value==1)
+								{
+									course_list.splice(i,1);
+									ssenvoyset("course",jsontostring(course_list));
+								}
+							});
+							break;
+						}
+						return;
+					}
+				}	
+			}
+		}
+		function changepage(id)
+		{
+			sessionset("course_time",id);
+			if($("#"+convert(id)+"title").html()=="")
+			{
+				goTo("m_course_add.html");
+			}
+			else
+			{
+				goTo("m_course_list.html");
+			}
+		}
+		
+		function clear_course_time(){
+			sessionset("course_time","");
+		}
+		function setheight() {
+			var height=document.body.clientHeight-42;
+			document.getElementById("firstdiv").style.height=height+"px";
+		   /*  var header = $(".header:visible");
+		    var footer = $(".footer:visible");
+		    var viewport_height = $(window).height();
+		    var content_height = viewport_height - header.outerHeight(); 
+		    content_height -= (content.outerHeight() - content.height());
+		    content_height-=80;
+		    document.getElementById("total").style.height=content_height+"px"; */
+  		}; 
+	</script>
+	<style type="text/css">
+		#firstdiv {
+			position:absolute; 
+			top:42px; bottom:0; left:0;
+			padding:0;
+			margin:0;
+			width:100%;
+			height:100%;
+			background:#aaa;
+			overflow:auto;
+		}
+		#seconddiv {
+			z-index:1;
+			width:420px;
+			height:100%;
+			float:left;
+			padding-left:0px;
+			margin:0;
+		}
+		.thelist {
+			list-style:none;
+			display:block;
+			float:left;
+			width:100%;
+			padding:0;
+			margin:0;
+			text-align:center;
+		}
+		.middle{
+			list-style:none;
+			display:block;
+			width:100%;
+			float:left;
+			padding:0;
+			margin:0;
+			text-align:center;
+		}
+		.middle li{
+			display:block;
+			vertical-align:middle;
+			float:left;
+			width:100%;
+			padding:0;
+			height:100%;
+			background-color:#FF9900;
+			font-size:14px;
+		}
+		.thelist li{
+			display:block;
+			vertical-align:middle;
+			float:left;
+			width:58px;
+			padding:0;
+			height:100%;
+			border-left:1px solid #FFF8D7;
+			border-right:1px solid #FFF8D7;
+			border-top:1px solid #FFF8D7;
+			border-bottom:1px solid #FFF8D7;
+			font-size:14px;
+		}
+		p{
+			color:blue;
+			font-weight:bold;
+		}
+	</style>
+    <div data-theme="a" data-role="header" data-position="fixed">
+    	<a href="../index.html" data-direction="reverse" data-icon="back" data-transition="slide">返回</a>
+		<h3 id="titleweek" style="color:#CCFF00">第 周</h3>
+		<a href="m_course_add.html" onclick="clear_course_time()" data-direction="reverse" data-icon="add" data-transition="slide">添加</a>
+	</div>
+    <div data-role="content" id="firstdiv">
+	<!-- 	<div id="firstdiv"> -->
+			<div id="seconddiv">
+				<ul class="thelist" style="height:4%" >
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周一</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周二</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周三</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周四</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周五</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周六</li>
+					<li style="background:#5B5B5B;color:yellow;font-weight:bold">周日</li>
+				</ul>
+				<ul class="thelist" style="height:18%;" >
+					<li onclick="changepage('周一 第1节')" style="background-color:#FFCCFF"><p id="1-1title"></p><p id ="1-1room"></p></li>
+					<li onclick="changepage('周二 第1节')" style="background-color:#FFCCFF"><p id="2-1title"></p><p id ="2-1room"></p></li>
+					<li onclick="changepage('周三 第1节')" style="background-color:#FFCCFF"><p id="3-1title"></p><p id ="3-1room"></p></li>
+					<li onclick="changepage('周四 第1节')" style="background-color:#FFCCFF"><p id="4-1title"></p><p id ="4-1room"></p></li>
+					<li onclick="changepage('周五 第1节')" style="background-color:#FFCCFF"><p id="5-1title"></p><p id ="5-1room"></p></li>
+					<li onclick="changepage('周六 第1节')" style="background-color:#FFCCFF"><p id="6-1title"></p><p id ="6-1room"></p></li>
+					<li onclick="changepage('周日 第1节')" style="background-color:#FFCCFF"><p id="7-1title"></p><p id ="7-1room"></p></li>
+				</ul>
+				<ul class="thelist" style="height:18%;" >
+					<li onclick="changepage('周一 第2节')" style="background-color:#FFCCFF"><p id="1-2title"></p><p id ="1-2room"></p></li>
+					<li onclick="changepage('周二 第2节')" style="background-color:#FFCCFF"><p id="2-2title"></p><p id ="2-2room"></p></li>
+					<li onclick="changepage('周三 第2节')" style="background-color:#FFCCFF"><p id="3-2title"></p><p id ="3-2room"></p></li>
+					<li onclick="changepage('周四 第2节')" style="background-color:#FFCCFF"><p id="4-2title"></p><p id ="4-2room"></p></li>
+					<li onclick="changepage('周五 第2节')" style="background-color:#FFCCFF"><p id="5-2title"></p><p id ="5-2room"></p></li>
+					<li onclick="changepage('周六 第2节')" style="background-color:#FFCCFF"><p id="6-2title"></p><p id ="6-2room"></p></li>
+					<li onclick="changepage('周日 第2节')" style="background-color:#FFCCFF"><p id="7-2title"></p><p id ="7-2room"></p></li>
+				</ul>
+				<ul class="middle" style="height:3%" >
+					<li style="color:blue;font-weight:bold">午餐休息(11:40~13:30)</li>
+				</ul>
+				<ul class="thelist"  style="height:18%;">
+					<li onclick="changepage('周一 第3节')" style="background-color:#FFCCFF"><p id="1-3title"></p><p id ="1-3room"></p></li>
+					<li onclick="changepage('周二 第3节')" style="background-color:#FFCCFF"><p id="2-3title"></p><p id ="2-3room"></p></li>
+					<li onclick="changepage('周三 第3节')" style="background-color:#FFCCFF"><p id="3-3title"></p><p id ="3-3room"></p></li>
+					<li onclick="changepage('周四 第3节')" style="background-color:#FFCCFF"><p id="4-3title"></p><p id ="4-3room"></p></li>
+					<li onclick="changepage('周五 第3节')" style="background-color:#FFCCFF"><p id="5-3title"></p><p id ="5-3room"></p></li>
+					<li onclick="changepage('周六 第3节')" style="background-color:#FFCCFF"><p id="6-3title"></p><p id ="6-3room"></p></li>
+					<li onclick="changepage('周日 第3节')" style="background-color:#FFCCFF"><p id="7-3title"></p><p id ="7-3room"></p></li>
+				</ul>
+				<ul class="thelist" style="height:18%;" >
+					<li onclick="changepage('周一 第4节')" style="background-color:#FFCCFF" class="week_1"><p id="1-4title"></p><p id ="1-4room"></p></li>
+					<li onclick="changepage('周二 第4节')" style="background-color:#FFCCFF"><p id="2-4title"></p><p id ="2-4room"></p></li>
+					<li onclick="changepage('周三 第4节')" style="background-color:#FFCCFF"><p id="3-4title"></p><p id ="3-4room"></p></li>
+					<li onclick="changepage('周四 第4节')" style="background-color:#FFCCFF"><p id="4-4title"></p><p id ="4-4room"></p></li>
+					<li onclick="changepage('周五 第4节')" style="background-color:#FFCCFF"><p id="5-4title"></p><p id ="5-4room"></p></li>
+					<li onclick="changepage('周六 第4节')" style="background-color:#FFCCFF"><p id="6-4title"></p><p id ="6-4room"></p></li>
+					<li onclick="changepage('周日 第4节')" style="background-color:#FFCCFF"><p id="7-4title"></p><p id ="7-4room"></p></li>
+				</ul>
+				<ul class="middle" style="height:3%" >
+					<li style="color:blue;font-weight:bold">晚餐休息(17:00~18:30)</li>
+				</ul>
+				<ul class="thelist" style="height:18%;" >
+					<li onclick="changepage('周一 第5节')" style="background-color:#FFCCFF"><p id="1-5title"></p><p id ="1-5room"></p></li>
+					<li onclick="changepage('周二 第5节')" style="background-color:#FFCCFF"><p id="2-5title"></p><p id ="2-5room"></p></li>
+					<li onclick="changepage('周三 第5节')" style="background-color:#FFCCFF"><p id="3-5title"></p><p id ="3-5room"></p></li>
+					<li onclick="changepage('周四 第5节')" style="background-color:#FFCCFF"><p id="4-5title"></p><p id ="4-5room"></p></li>
+					<li onclick="changepage('周五 第5节')" style="background-color:#FFCCFF"><p id="5-5title"></p><p id ="5-5room"></p></li>
+					<li onclick="changepage('周六 第5节')" style="background-color:#FFCCFF"><p id="6-5title"></p><p id ="6-5room"></p></li>
+					<li onclick="changepage('周日 第5节')" style="background-color:#FFCCFF"><p id="7-5title"></p><p id ="7-5room"></p></li>
+				</ul>
+			</div>
+		</div>
+    </div>
+<!-- </div> -->

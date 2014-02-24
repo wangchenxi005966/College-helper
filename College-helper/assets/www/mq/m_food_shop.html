@@ -1,0 +1,63 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_food_shop">
+	<script type="text/javascript">
+		function setshopname(owner,phone){
+			ssenvoyset("shop_owner",owner);
+			ssenvoyset("shop_phone",phone);
+		}
+		$(document).ready(function() {
+			$("ul[id=m_show_shop] li").remove();
+			$("#m_food_shop").page();
+			$("#m_show_shop").listview("refresh");
+			if(ssenvoyget("food_tag")==null||ssenvoyget("food_tag")=="")
+			{
+				//uplodes();
+				//alert("失败了");
+				myAlert("数据丢失，请联网使用!");
+				goTo("../index.html");
+				return;
+			}
+			var food_shop=stringtojson(ssenvoyget("food_tag"));
+			for(var i=0;i<food_shop.length;i++)
+			{
+				var info=stringtojson(food_shop[i]);
+				$("#m_show_shop").append('<li  data-theme="c"  onclick="setshopname(\''
+					+ info["shop"]+ '\',\''+info["phone"]+'\')" >'+ '<a href="m_food_list.html" data-transition="slide" data-theme="e" data-icon="star">'
+					+ info["shop"]+ '</a></li>');
+				$("#m_food_shop").page();
+				$("#m_show_shop").listview("refresh");
+			}
+		});
+		function uplodes()
+		{
+			if(ssenvoyget("food_tag")!=null){
+				$.getJSON("http://college-helper-server.wicp.net/get_web_food.php?food="+ssenvoyget("food_tag")+"&callback=?").done(function(data){
+					modifyDate(data);
+				}).fail(function()
+				{
+					alert("获取网络数据失败!");
+					goTo("../index.html");
+				});
+			}
+			else{
+				$.getJSON("http://college-helper-server.wicp.net/get_web_food.php?food=update&callback=?").done(function(data){
+					handleDate(data);
+				}).fail(function(){
+					alert("获取网络数据失败，请稍后尝试");
+					goTo("../index.html");
+				});
+			}
+		}
+	</script>
+	<div data-theme="a" data-role="header">
+		<a href="../index.html" data-icon="back" data-direction="reverse" data-transition="slide">返回</a>
+		<h3>所有店铺</h3>
+	</div>
+	<div data-role="content">
+		<ul data-role="listview" data-filter="true" id="m_show_shop"
+			data-filter-placeholder="搜索" data-divider-theme="b" data-inset="true">
+		</ul>
+	</div>
+</div>
+
+

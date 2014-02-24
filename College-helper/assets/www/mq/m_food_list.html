@@ -1,0 +1,75 @@
+﻿<meta charset="utf-8">
+<div data-role="page" id="m_food_list">
+	<script type="text/javascript">
+		$("#m_food_list").on("pageinit",function() {
+			$("#n_shopname").html(ssenvoyget("shop_owner"));
+			$("ul[id=m_show_food] li").remove();
+			$("#m_food_list").page();
+			$("#m_show_food").listview("refresh");
+			var food_shop=stringtojson(ssenvoyget("food_info"));
+			for(var i=0;i<food_shop.length;i++)
+			{
+				var food_name=stringtojson(food_shop[i]);
+				if(food_name["shop"]==ssenvoyget("shop_owner"))
+				{
+					var infos=food_name["value"];
+					if(infos=="undefined"||infos==undefined)
+					{
+						//清除数据
+						sessionset("updatefood",0);
+						var food_tag_json=stringtojson(ssenvoyget("food_tag"));
+						var tag_index=get_index_info(food_name["shop"],food_tag_json);
+						food_tag_json.splice(tag_index,1);
+						ssenvoyset("food_tag",jsontostring(food_tag_json));
+						
+						var food_info_json=stringtojson(ssenvoyget("food_info"));
+						var info_index=get_index_info(food_name["shop"],food_info_json);
+						food_info_json.splice(info_index,1);
+						ssenvoyset("food_info",jsontostring(food_info_json));
+						myAlert("数据丢失!请重新尝试!");
+						goTo("../index.html");
+						return;
+					}
+					for(var j=0;j<infos.length;j++)
+					{
+						var info=infos[j];
+						$("#m_show_food").append('<li onclick="m_set_price(\''+info["foodname"]+'\',\''+info["price"]+'\')" >'+
+							'<a href="m_food_add.html" data-transition="slide" data-theme="e" data-icon="star">'+info["foodname"]+'</a></li>');
+					}
+					$("#m_food_list").page();
+        			$("#m_show_food").listview("refresh");
+					break;
+				}
+			}
+		});
+		
+		function get_index_info(shop,json)
+		{
+			for(var i=0;i<json.length;i++)
+			{
+				if(shop==json[i].shop)
+					return i;
+			}
+			return -1;
+		}
+		function m_set_price(name,price){
+			ssenvoyset("foodname",name);
+			ssenvoyset("price",price);
+			ssenvoyset("modify",0);
+		}
+		function clear_order()
+		{
+			if(ssenvoyget("food_order")!=null)
+				ssenvoyremove("food_order");
+		}
+	</script>
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<a href="m_food_shop.html" data-direction="reverse" data-icon="back" onclick="clear_order()" data-transition="slide">返回</a>
+		<h3 id="n_shopname"></h3>
+	</div>
+	<div data-role="content">
+		<ul data-role="listview" data-filter="true" id="m_show_food"
+			data-filter-placeholder="搜索" data-divider-theme="b" data-inset="true">
+		</ul>
+	</div>
+</div>

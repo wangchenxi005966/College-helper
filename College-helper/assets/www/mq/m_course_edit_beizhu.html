@@ -1,0 +1,61 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_course_edit_beizhu">
+	<script type="text/javascript">
+		$(document).bind("pageinit",function(){
+			var cur_course=stringtojson(get_course());//json格式
+			$("#m_course_name").html("课程名："+cur_course.name);
+			$("#m_beizhu").val(cur_course.beizhu);
+		});
+		
+		function save()
+		{
+			var cur_course=stringtojson(get_course());
+			var course_list=stringtojson(ssenvoyget("course"));
+			var num=get_num(cur_course.time,cur_course.week,course_list);
+			//保存
+			course_list[num]=stringtojson(course_list[num]);
+			course_list[num].beizhu=$("#m_beizhu").val();
+			if(course_list[num].syn=="0"){//已上传,置为修改
+				course_list[num].syn="update";
+			}
+			else{//置为上传
+				course_list[num].syn="uplode";
+			}
+			course_list[num].old_time=cur_course.time;
+			course_list[num].old_week=cur_course.week;
+			course_list[num]=jsontostring(course_list[num]);
+			ssenvoyset("course",jsontostring(course_list));
+			goTo("m_course_list.html");
+		}	
+	</script>
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<a href="m_course_list.html" data-direction="reverse" data-icon="back" data-transition="slide">取消</a>
+		<h3 id="title">修改备注信息</h3>
+	</div>
+	<div data-role="content" >
+		<div style="margin:0;padding:0px;">
+		<ul data-role="listview" data-divider-theme="b" data-inset="false">
+			<li data-theme="d" data-icon="false" style="padding:0px;"><p id="m_course_name" style="margin-top:10px;color:#73BF00;font-weight:bold;font-size:18px;text-align:center"></p>
+			</li>
+		</ul>
+		</div>
+		<div style="margin-top:30px;">
+			<textarea cols="40" rows="8" name="textarea" id="m_beizhu"></textarea>
+		</div>
+		<div class="ui-grid-a">
+			<div class="ui-block-a">
+				<a data-role="button" data-transition="slide" style="background:#FF0000;color:#FFFFFF;" 
+				href="m_course_list.html" >
+					取消
+				</a>
+			</div>
+			<div class="ui-block-b">
+				<a data-role="button" data-transition="slide" style="background:#FF0000;color:#FFFFFF;" 
+				onclick="save()" >
+					保存
+				</a>
+			</div>
+		</div>
+	</div>
+</div>
+

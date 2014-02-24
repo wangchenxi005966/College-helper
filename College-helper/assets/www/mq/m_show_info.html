@@ -1,0 +1,45 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_show_info">
+	<script type="text/javascript">
+		function getJsUrl(){
+			var str = location.href; 
+			var parastr = str.split("?")[1]; //获取参数部分
+			return parastr.split("=")[1];
+		}
+		$("#m_show_info").on("pagebeforeshow", function() {
+			var href=getJsUrl();
+			getInfo(href);
+		});
+		function getInfo(href)
+		{
+			$.getJSON("http://college-helper-server.wicp.net/get_web_info.php?href="+href+"&callback=?").done(function(data){
+				$("#mq_show_info_con").append(data.value);
+			}).fail(function(data){
+				$("#mq_show_info_con").append("<p style=\"align:center\">404 Not Found!</p>");
+			});
+		}
+	</script>
+	<style type="text/css">
+		.title{
+			font-size:18px;
+			color:#42426F;
+		}
+		.date{
+			color:red;
+		}
+		#mq_show_info_con
+		{
+			margin-left:3px;
+			margin-right:3px;
+		}
+	</style>
+    <div data-theme="a" data-role="header" data-position="fixed">
+    	<a href="m_show_notice.html" data-direction="reverse" data-icon="back" data-transition="slide">返回</a>
+		<h3 id="title">学院通知</h3>
+	</div>
+    <div data-role="content" id="info_content">
+    	<div id="mq_show_info_con">
+    	</div>
+    </div>
+</div>
+

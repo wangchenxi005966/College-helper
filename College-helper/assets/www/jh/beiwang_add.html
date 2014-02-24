@@ -1,0 +1,94 @@
+<div data-role="page" id="home" data-theme="e">
+    <script type="text/javascript">
+        
+        $(document).one("pageinit", function(){
+            var now = new Date();
+            $('.demo').mobiscroll().treelist({
+                theme: 'ios',
+                width: 120,
+                lang: "zh",
+                display: 'bottom',
+                mode: 'scroller',
+                
+                inputClass: 'i_input'
+            });
+            $("#demo_dummy").val("单次");
+            
+            
+            $("#test_select").mobiscroll().select({
+                theme: 'ios',
+                width: 200,
+                lang: "zh",
+                display: 'bottom',
+                mode: 'scroller',
+                inputClass: 'i_input'
+            
+            });
+            
+            $("#start_time").mobiscroll().datetime({
+            
+                theme: 'ios',
+                lang: 'zh',
+                display: 'bottom',
+                mode: 'scroller',
+                inputClass: 'i_input',
+                dateFormat: "yy/mm/dd",
+                dateOrder: "yymmdd"
+            });
+            $("#start_time").val(now.format("yyyy/MM/dd") + " " + now.format("hh:mm"));
+            $(".i_input").on("vclick", function(){
+                $(".i_input").blur();
+                $(this).focus();
+            });
+        });
+    </script>
+    <div data-role="header">
+        <a href="beiwang.html" data-role="button" data-icon="back" data-transition="slidedown">返回</a>
+        <h1>添加备忘</h1>
+        <a data-role="button" id="save1" onclick="save1()">保存</a>
+    </div>
+    <div data-role="content" class="content">
+        <div class="ui-grid-a ui-grid-a_1">
+            <div class="ui-block-a ui-block-a_1">
+                名称
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input type="text" id="event_name" name="event_name" data-role="none" value="" class="i_input" placeholder="请输入事件名称" />
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                时间
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input class="text-center i_input" type="text" id="start_time" name="start_time" value="" data-role="none" />
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                重复
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <ul id="demo" style="display: none" class="demo">
+                    <li data-val="不重复">
+                        单次
+                    </li>
+                    <li data-val="每日重复">
+                        每日重复
+                    </li>
+                    <li data-val="每周重复">
+                        每周重复
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                备注
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input type="text" id="remarks" name="remarks" placeholder="点击输入事件备注" data-role="none" class="i_input" />
+            </div>
+        </div>
+    </div>
+</div>

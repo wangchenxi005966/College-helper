@@ -1,0 +1,200 @@
+<div data-role="page" class="bg_page" id="setting_page">
+	<style type="text/css">
+.liimg {
+	margin-top:2px;
+	margin-bottom: 5px;
+	margin-left: 8px;
+	width: 70px;
+	height: 75px;
+	-webkit-border-radius: 8px;
+	border-radius: 8px;
+}
+
+.quit {
+	line-height: 45px;
+	height: 45px;
+	background: -webkit-gradient(linear, left top, left bottom, from(#f74634),
+		to(#ce2715));
+	text-shadow: 0 0 10px #afc8e2;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px
+		#afc8e2;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+	margin: 0 auto;
+	display: block;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	font-weight: bold;
+	clear: left;
+	text-align: center;
+}
+
+.choice {
+	position: absolute;
+	padding: 10px 25px;
+	display: none;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	height: 30%;
+	z-index: 5;
+	border-radius: 8px 8px 0px 0px;
+	border-color: rgba(0, 0, 0, .3);
+	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)),
+		to(rgba(0, 0, 0, 0.5)), color-stop(0.6, rgba(0, 0, 0, 0.2)));
+}
+
+.my_cancle {
+	color: white; line-height : 45px;
+	height: 45px;
+	background: -webkit-gradient(linear, left top, left bottom, from(#444),
+		to(#2d2d2d));
+	text-shadow: 0 0 10px #afc8e2;
+	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px
+		#afc8e2;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+	margin: 0 auto;
+	display: block;
+	-moz-border-radius: 4px;
+	-webkit-border-radius: 4px;
+	border-radius: 4px;
+	font-weight: bold;
+	clear: left;
+	text-align: center;
+	line-height: 45px;
+}
+
+.fullbg {
+	background: rgba(0, 0, 0, 0.5);
+	display: none;
+	z-index: 3;
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 0px;
+	height: 0px;
+}
+</style>
+	<script type="text/javascript">
+		$(document)
+				.one(
+						"pageinit",
+						function() {
+							var personinfo = ssenvoyget("personinfo");
+							personinfo = stringtojson(personinfo);
+							if (personinfo.head_sculpture != null
+									&& personinfo.head_sculpture != "") {
+								var largeImage = document
+										.getElementById('mytouxiang');
+								largeImage.style.display = 'block';
+								//largeImage.src = imageURI;
+								largeImage.src = personinfo.head_sculpture
+										+ "?" + (new Date()).getTime();
+							}
+							$("#username_1").text(personinfo.username);
+							$(".quit")
+									.on(
+											"vmousedown",
+											function() {
+												//alert("test");
+												$(this)
+														.css("background",
+																"-webkit-gradient(linear,left top,left bottom,from(#ce2715),to(#f74634))");
+											});
+							$(".quit")
+									.on(
+											"vmouseup",
+											function() {
+												$(this)
+														.css("background",
+																"-webkit-gradient(linear,left top,left bottom,from(#f74634),to(#ce2715))");
+											});
+
+							$(".quit_choice").on("vclick", function() {
+								showBg();
+								$(".confirm_quit").show();
+							});
+
+							$(".my_cancle")
+									.on(
+											"vmousedown",
+											function() {
+												$(this)
+														.css("background",
+																"-webkit-gradient(linear, left top, left bottom, from(#2d2d2d),to(#444))");
+											});
+							$(".my_cancle")
+									.on(
+											"vmouseup",
+											function() {
+												$(this)
+														.css("background",
+																"-webkit-gradient(linear, left top, left bottom, from(#444),to(#2d2d2d))");
+											});
+							$(".quit_true").on("vclick", function() {
+								quit();
+								$(".choice").hide();
+								closeBg();
+							});
+
+							$(".cancle").click(function() {
+								$(".choice").hide();
+								closeBg();
+							});
+
+						});
+			function setweek()
+			{
+				//设置今日是第几周
+				var today=new Date();
+				var start=new Date("2013/9/9");
+				var date3=today.getTime()-start.getTime();
+				var days=Math.floor(date3/(7*24*3600*1000))+1;
+				sessionset("week",days);
+				var login=ssenvoyget("login");
+				if(login=="true")
+				{
+					goTo("mq/m_course_index.html");
+				}
+				else{
+					var confir=confirm("你还未登陆，是否登陆？");
+					if(confir)
+					{
+						goTo("lwm/login.html");
+					}
+					else{
+						return;
+					}
+				}
+			}
+	</script>
+	<div data-role="header" class="bg_header">
+		<a href="../index.html" data-icon="back">返回</a>
+		<h3>设置</h3>
+	</div>
+	<div class="fullbg"></div>
+	<div data-role="content">
+		<ul data-role="listview" data-inset="true" data-inline="true">
+			<li style="padding: 1px;"><a href="myaccount.html"><img
+					src="image/default.png" class="liimg" id="mytouxiang">
+					<h3 id="username_1">wayne</h3></a></li>
+			<li><a href="personinfo.html">我的资料</a></li>
+			<li><a href="../homepage/index.html" data-transition="slide">我的空间</a>
+			</li>
+		</ul>
+		<ul data-role="listview" data-inset="true" data-inline="true">
+			<li><a href="../jh/jh_index.html">我的计划</a></li>
+			<li><a href="../mq/m_course_index.html" onclick="setweek()">我的课表</a></li>
+		</ul>
+		<ul data-role="listview" data-inset="true" data-inline="true">
+			<li><a href="about.html">关于</a></li>
+		</ul>
+		<a class="quit quit_choice" data-role="none">退出登录</a>
+
+	</div>
+	<div class="choice confirm_quit">
+		<a class="quit quit_true" data-role="none" style="margin-top: 40px"
+			>退出</a> <br> <a class="cancle my_cancle"
+			data-role="none">取消</a>
+	</div>
+</div>

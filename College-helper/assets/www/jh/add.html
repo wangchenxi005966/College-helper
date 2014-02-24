@@ -1,0 +1,192 @@
+<div data-role="page" data-theme="e" id="add_page">
+    <script type="text/javascript">
+        
+        $(document).one("pageinit", function(){
+            var now = new Date();
+            $('.demo').mobiscroll().treelist({
+                theme: 'ios',
+                width: 120,
+                lang: "zh",
+                display: 'bottom',
+                mode: 'scroller',
+                
+                inputClass: 'i_input'
+            });
+            $("#demo_dummy").val("其他");
+            
+            $("#demo1_dummy").val("3");
+            $("#demo2_dummy").val("单次");
+            $("#test_select").mobiscroll().select({
+                theme: 'ios',
+                width: 200,
+                lang: "zh",
+                display: 'bottom',
+                mode: 'scroller',
+                inputClass: 'i_input'
+            
+            });
+            
+            $("#start_time").mobiscroll().datetime({
+            
+                theme: 'ios',
+                lang: 'zh',
+                display: 'bottom',
+                mode: 'scroller',
+                inputClass: 'i_input',
+                dateFormat: "yy/mm/dd",
+				dateOrder: 'yymmdd'
+            });
+            $("#over_time").mobiscroll().datetime({
+            
+                theme: 'ios',
+                lang: 'zh',
+                display: 'bottom',
+                mode: 'scroller',
+                inputClass: 'i_input',
+                dateFormat: "yy/mm/dd",
+				dateOrder: 'yymmdd'
+            });
+            
+            $("#start_time").val(now.format("yyyy/MM/dd") + " " + now.format("hh:mm"));
+            
+            $("#over_time").val(now.format("yyyy/MM/dd") + " " + now.format("hh:mm"));
+            
+            $(".i_input").on("vclick",function(){
+				$(".i_input").blur();
+				$(this).focus();
+			});
+			
+			
+			$("#save").on("vclick",function()
+			{
+				save();
+			});
+        });
+    </script>
+    <div data-theme="a" data-role="header">
+        <a href="jh_index.html" data-icon="back" data-transition="slidedown">返回</a>
+        <h3>事件添加</h3>
+        <button id="save" data-icon="save">
+            保存
+        </button>
+    </div>
+    <div data-role="content" class="content">
+        <div class="ui-grid-a ui-grid-a_1">
+            <div class="ui-block-a ui-block-a_1">
+                名称
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input type="text" id="event_name" name="event_name" data-role="none" value="" class="i_input" placeholder="请输入事件名称" />
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                类别
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <ul id="demo" style="display: none" class="demo">
+                    <li data-val="约会">
+                        约会
+                    </li>
+                    <li data-val="学习">
+                        学习
+                    </li>
+                    <li data-val="工作">
+                        工作
+                    </li>
+                    <li data-val="家务">
+                        家务
+                    </li>
+                    <li data-val="其他">
+                        其他
+                    </li>
+                </ul>
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                参与人
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input type="text" id="event_participator" name="event_participator" placeholder="多人参与时，以空格隔开名称" data-role="none" class="i_input" />
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                提醒
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <select name="remind" id="remind" class="remind" data-role="slider">
+                    <option value="off">off</option>
+                    <option value="on">on</option>
+                </select>
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                开始时间
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input class="text-center i_input" type="text" id="start_time" name="start_time" value="" data-role="none" />
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                结束时间
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <input class="text-center i_input" type="text" id="over_time" name="over_time" value="" data-role="none" />
+            </div>
+        </div>
+        <div class="ui-grid-c ui-grid-c_1">
+            <div class="ui-block-a ui-block-a_1">
+                提醒提前
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <ul id="demo1" style="display: none" class="demo">
+                    <li data-val="3">
+                        3
+                    </li>
+                    <li data-val="5">
+                        5
+                    </li>
+                    <li data-val="10">
+                        10
+                    </li>
+                    <li data-val="15">
+                        15
+                    </li>
+                    <li data-val="30">
+                        30
+                    </li>
+                    <li data-val="60">
+                        60
+                    </li>
+                </ul>
+            </div>
+            <div class="ui-block-c ui-block-c_1">
+                <p>
+                    分钟
+                </p>
+            </div>
+        </div>
+        <div class="ui-grid-b ui-grid-b_1">
+            <div class="ui-block-a ui-block-a_1">
+                重复
+            </div>
+            <div class="ui-block-b ui-block-b_1">
+                <ul id="demo2" style="display: none" class="demo">
+                    <li data-val="单次">
+                        单次
+                    </li>
+                    <li data-val="每天重复">
+                        每天重复
+                    </li>
+                    <li data-val="每周重复">
+                        每周重复
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,30 @@
+<meta charset="utf8">
+<div data-role="page" id="bus">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $.getJSON("http://college-helper-server.wicp.net/detail_bus.php?callback=?", function(data){
+                $("#site").empty();
+                $("#bus").page();
+                $("#site").listview('refresh');
+                $.each(data, function(infoIndex, info){
+                    if (info["name"] == window.sessionStorage.getItem("bus_name")) {
+                        $("#site").append('<li>' + info["site"] + '</li>');
+                    }
+                });
+                $("#bus").page();
+                $("#site").listview('refresh');
+            });
+        });
+    </script>
+    <div data-role="header" data-position="fixed" data-theme="a">
+        <a href="tran.html" data-transition="slide" data-role="button" data-inline="true" data-icon="back">返回</a>
+        <h1>校园助手</h1>
+    </div>
+    <div data-role="content">
+        <h2>汽车发车时间</h2>
+        <ul data-role="listview" id="site">
+        </ul>
+    </div>
+    <div data-role="footer" data-theme="a" data-position="fixed" data-tap-toggle="false">
+    </div>
+</div>

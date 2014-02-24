@@ -1,0 +1,150 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_food_add">
+	<script type="text/javascript">
+		var key_val = "{";
+		for (i = 1; i < 11; i++) {
+		    if (key_val != "{")
+		        key_val += ",";
+		    key_val += ("\"" + i + "\":\"" + i + "\"");
+		}
+		key_val += "}";
+		
+		$(function(){
+		    $("#m_demo").mobiscroll().scroller({
+		        theme: "ios",
+		        display: "bottom",
+		        mode: "scroller",
+		        lang: "zh",
+		        inputClass: "i-txt",
+		        width: 70,
+		        wheels: [{"mas1": JSON.parse(key_val)}]
+		    });
+	    });
+	    function search_food(name,food_json){//查询是否已经存在，存在返回编号，不存在返回-1
+	    	for(var i=0;i<food_json.length;i++)
+	    	{
+	    		if(name==stringtojson(food_json[i]).name)
+	    			return i;
+	    	}
+	    	return -1;
+	    }
+		$("#m_food_add").ready(function()
+		{
+			$("#n_shopname2").html(ssenvoyget("shop_owner"));
+			$("#name").html(ssenvoyget("foodname"));
+			$("#price").html("￥:"+ssenvoyget("price")+"元");
+			$("#m_add").click(function()
+			{
+				var key="food_order";
+				if(ssenvoyget("food_order")!=null)
+				{
+					var food_json=stringtojson(ssenvoyget(key));
+					var index=search_food(ssenvoyget("foodname"),food_json);
+					if(index==-1){					
+						food_json.push(jsontostring({"name":ssenvoyget("foodname"),"amount":parseInt($("#m_demo").val()),
+						"price":parseFloat(ssenvoyget("price"))}));
+					}
+					else{//修改
+						food_json[index]=stringtojson(food_json[index]);
+						food_json[index].amount+=parseInt($("#m_demo").val());
+						food_json[index]=jsontostring(food_json[index]);
+					}
+					ssenvoyset(key,jsontostring(food_json));
+				}
+				else{
+					var food_json=new Array();
+					food_json.push(jsontostring({"name":ssenvoyget("foodname"),"amount":parseInt($("#m_demo").val()),
+						"price":parseFloat(ssenvoyget("price"))}));
+					ssenvoyset(key,jsontostring(food_json));
+				}
+			});
+			
+		});
+	</script>
+	<style type="text/css">
+	.i-txt{
+        border: none;
+        margin: 0px;
+        padding: 0px;
+        width: 100%;
+        height: 100%;
+        color: red;
+        text-align: right;
+        background:#EAEAEA;
+        font-size: 17px;
+    }
+	</style>
+        <div data-theme="a" data-role="header" data-position="fixed">  
+        	<a href="m_food_list.html" data-direction="reverse" data-icon="back" data-transition="slide">返回</a>
+            <h2 id="n_shopname2"></h2> 
+        </div>
+        <div data-role="content">
+            <form style="width: 100%">
+            <ul data-role="listview" data-inset="true" style="width: 100%">
+                <li>
+                    <table style="width: 100%">
+                        <tr>
+                        	<td width="8%">
+								<img src="images/src/home.png">
+							</td>
+                            <td width="32%" style="text-align: left;">
+                           		     菜名
+                            </td>
+                            <td width="60%" id="name" style="text-align: right; color: Red">
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+                <li>
+                    <table style="width: 100%">
+                        <tr>
+                        	<td width="8%">
+								<img src="images/src/lock.png">
+							</td>
+                            <td width="32%" style="text-align: left;">
+                                价格
+                            </td>
+                            <td width="60%" id="price" style="text-align: right; color: Red">
+                                
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+                
+                <li>
+                    <table style="width: 100%">
+                        <tr>
+                        	<td width="8%">
+								<img src="images/src/pencil.png">
+							</td>
+                            <td width="32%" style="text-align: left;">
+                                份量
+                            </td>
+                            <td width="60%" id="amount" style="text-align: right; color: Red">
+                           		<input id="m_demo" name="m_demo" data-role="none" value="1" class="i-txt" />
+                            </td>
+                        </tr>
+                    </table>
+                </li>
+            </ul>
+            </form>
+            <div class="ui-grid-a">
+            <div class="ui-block-a">
+                <a data-role="button" data-direction="reverse" data-transition="slide"
+                data-theme="e" href="m_food_list.html" id="m_delete">
+                   取消
+                </a>
+            </div>
+            <div class="ui-block-b">
+                <a data-role="button" data-transition="slide" data-theme="e" 
+                id="m_add" href="m_food_order.html">
+                    添加
+                </a>
+            </div>
+        </div>
+        </div>
+        <div data-role="footer" data-position="fixed">
+
+        </div>
+    </div>

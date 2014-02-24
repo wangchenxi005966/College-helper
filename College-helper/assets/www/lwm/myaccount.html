@@ -1,0 +1,249 @@
+<div data-role="page" class="bg_page">
+    <style type="text/css">
+        .mytable {
+            width: 100%;
+            height: 100%;
+            border: none;
+			table-layout:fixed;
+        }
+        
+        .myli {
+            /* background-image: -webkit-linear-gradient(#f1f1f1,#fff);*/
+            /*-webkit-gradient(linear, left top,left bottom,from(#f1f1f1),to(#fff));*/
+        }
+        
+        .myicon_1 {
+            display: block;
+            width: 18px;
+            height: 18px;
+            background-image: url(../css/images/icons-18-black.png);
+            background-repeat: no-repeat;
+            background-position: -108px -1px;
+        }
+        
+        .edit_liimg {
+            width: 55px;
+            height: 55px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        
+        .quit {
+            line-height: 45px;
+            height: 45px;
+            background: -webkit-gradient(linear, left top, left bottom, from(#f74634),
+        		to(#ce2715));
+        	text-shadow: 0 0 10px #afc8e2;
+        	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px
+        		#afc8e2;
+        	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+        	margin: 0 auto;
+        	display: block;
+        	-moz-border-radius: 4px;
+        	-webkit-border-radius: 4px;
+        	border-radius: 4px;
+        	font-weight: bold;
+        	clear: left;
+        	text-align: center;
+        }
+        
+        .choice {
+        	position: absolute;
+        	padding: 10px 25px;
+        	display: none;
+        	left: 0px;
+        	right: 0px;
+        	bottom: 0px;
+        	height: 30%;
+        	z-index: 5;
+        	border-radius: 8px 8px 0px 0px;
+        	border-color: rgba(0, 0, 0, .3);
+        	background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)),
+        		to(rgba(0, 0, 0, 0.5)), color-stop(0.6, rgba(0, 0, 0, 0.2)));
+        }
+        
+        .my_cancle {
+        	color: white;
+        	line-height: 45px;
+        	height: 45px;
+        	background: -webkit-gradient(linear, left top, left bottom, from(#444),
+        		to(#2d2d2d));
+        	text-shadow: 0 0 10px #afc8e2;
+        	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px
+        		#afc8e2;
+        	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+        	margin: 0 auto;
+        	display: block;
+        	-moz-border-radius: 4px;
+        	-webkit-border-radius: 4px;
+        	border-radius: 4px;
+        	font-weight: bold;
+        	clear: left;
+        	text-align: center;
+        	line-height: 45px;
+        }
+        
+        .fullbg {
+        	background: rgba(0, 0, 0, 0.5);
+        	display: none;
+        	z-index: 3;
+        	position: absolute;
+        	left: 0px;
+        	top: 0px;
+        	width: 0px;
+        	height: 0px;
+        }
+		
+		.my_td
+		{
+			word-break: break-all; 
+			word-wrap:break-word;
+		}
+    </style>
+    <script type="text/javascript">
+        $(document).one("pageinit", function(){
+            var personinfo = stringtojson(ssenvoyget("personinfo"));
+            $("#myaccount").text(personinfo.email);
+            if (personinfo.head_sculpture != "" &&
+            personinfo.head_sculpture != null) {
+                //$("#headsculpture").src=personinfo.head_sculpture;
+                var largeImage = document.getElementById('headsculpture');
+                largeImage.style.display = 'block';
+                //largeImage.src = imageURI;
+                largeImage.src = personinfo.head_sculpture +
+                "?" +
+                (new Date()).getTime();
+            }
+            
+            $(".myli").on("vmousedown", function(){
+                $(this).css('background', '#0000FF');
+            });
+            $(".myli").on("vmouseup", function(){
+                $(this).css('background', '#eee');
+            });
+            
+            $("#edit_passwd").on("vclick", function(){
+                setTimeout("change_passwd()", 100);
+            });
+            
+            $("#edit_email").on("vclick", function(){
+                setTimeout("change_email()", 100);
+            });
+            
+            $(".quit").on("vmousedown", function(){
+                //alert("test");
+                $(this).css("background", "-webkit-gradient(linear,left top,left bottom,from(#ce2715),to(#f74634))");
+            });
+            $(".quit").on("vmouseup", function(){
+                $(this).css("background", "-webkit-gradient(linear,left top,left bottom,from(#f74634),to(#ce2715))");
+            });
+            
+            $(".quit_choice").on("vclick", function(){
+                showBg();
+                $(".confirm_quit").show();
+            });
+            
+            $(".my_cancle").on("vmousedown", function(){
+                $(this).css("background", "-webkit-gradient(linear, left top, left bottom, from(#2d2d2d),to(#444))");
+            });
+            $(".my_cancle").on("vmouseup", function(){
+                $(this).css("background", "-webkit-gradient(linear, left top, left bottom, from(#444),to(#2d2d2d))");
+            });
+            $(".quit_true").on("vclick", function(){
+                quit();
+                $(".choice").hide();
+                closeBg();
+            });
+            
+            $(".cancle").click(function(){
+                $(".choice").hide();
+                closeBg();
+            });
+        });
+        function change_passwd(){
+            var onConfirm = function(buttontext){
+                if (buttontext == 1) {
+                    $.mobile.changePage("edit_passwd.html", {
+                        transition: "slideup"
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+            navigator.notification.confirm('确认修改密码？', onConfirm, '确认信息', '确认,取消');
+        }
+        
+        function change_email(){
+            var onConfirm = function(buttontext){
+                if (buttontext == 1) {
+                    $.mobile.changePage("edit_email.html", {
+                        transition: "slideup"
+                    });
+                }
+                else {
+                    return;
+                }
+            }
+            navigator.notification.confirm('确认修改账号？', onConfirm, '确认信息', '确认,取消');
+        }
+    </script>
+    <div data-role="header" class="bg_header">
+        <a href="setting.html" data-icon="back">返回</a>
+        <h3>账户</h3>
+    </div>
+    <div class="fullbg">
+    </div>
+    <div data-role="content">
+        <ul data-role="listview" data-inset="true" data-inline="true">
+            <li data-role="fieldcon ain" style="padding: 1px;" class="myli">
+                <table class="mytable">
+                    <tr>
+                        <td width="25%" style="line-height: 1px; padding-left: 5px;">
+                            <img id="headsculpture" src="image/default.png" class="edit_liimg">
+                        </td>
+                        <td width="65%" align="right" class="my_td" id="myaccount">
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon_1"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+        <br/>
+        <ul data-role="listview" data-inset="true" data-inline="true">
+            <li data-role="fieldcon ain" style="padding: 1px; height: 45px;" class="myli" id="edit_passwd">
+                <table class="mytable">
+                    <tr>
+                        <td width="90%" style="line-height: 1px; padding-left: 5px;">
+                            密码更改
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon_1"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldcon ain" style="padding: 1px; height: 45px;" class="myli" id="edit_email">
+                <table class="mytable">
+                    <tr>
+                        <td width="90%" style="line-height: 1px; padding-left: 5px;">
+                            更改账号邮箱
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon_1"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+        <br/>
+        <a class="quit quit_choice" data-role="none">退出登录</a>
+    </div>
+    <div class="choice confirm_quit">
+        <a class="quit quit_true" data-role="none" style="margin-top: 40px">退出</a>
+        <br>
+        <a class="cancle my_cancle" data-role="none">取消</a>
+    </div>
+</div>

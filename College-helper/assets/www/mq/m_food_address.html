@@ -1,0 +1,56 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_food_address">
+	<script type="text/javascript">
+		$(document).ready(function()
+		{
+			if(ssenvoyget("address_choosed")!=null)
+			{
+				$("#address_input").val(ssenvoyget("address_choosed"));
+			}
+			$("#add_address").click(function(){
+				var address=$("#address_input").val();
+				if(address!="")
+				{
+					if(address.length<20)
+					{
+						ssenvoyset("address_choosed",$("#address_input").val());
+						goTo("m_food_order.html");
+					}
+					else
+					{
+						alert("地址不能太长");
+					}
+				}
+				else
+				{
+					alert("地址不能为空");
+				}
+			});
+		});
+	</script>
+	<div data-theme="a" data-role="header">
+		<h3 id="title">外卖接收地址</h3>
+	</div>
+	<div data-role="content">
+		<div data-role="fieldcontain">
+            <label for="textinput1">
+                外卖接收地址
+            </label>
+            <input name="" id="address_input" placeholder="请输入外卖接收地址" value="" type="text">
+        </div>
+        <div class="ui-grid-a">
+            <div class="ui-block-a">
+                <a data-role="button" data-theme="e" href="m_food_order.html" data-transition="slide">
+                    取消
+                </a>
+            </div>
+            <div class="ui-block-b">
+                <a data-role="button" data-theme="e" data-transition="slide" id="add_address">
+                    添加
+                </a>
+            </div>
+        </div>
+	</div>
+</div>
+
+

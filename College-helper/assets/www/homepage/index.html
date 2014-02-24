@@ -1,0 +1,177 @@
+<div data-role="page" id="indexPage" class="bg_page">
+    <link rel="stylesheet" href="css/global.css">
+    <link rel="stylesheet" href="css/pull.css">
+    <script src="js/index.js"></script>
+    <script type="text/javascript"> 
+        $(function(){       
+        	document.addEventListener("deviceready", onDeviceReady, false);
+            // 加载iscroll
+            setTimeout(initIscrolla, 200);
+            
+            var personinfo = ssenvoyget("personinfo");
+            personinfo = stringtojson(personinfo);
+            if (personinfo.head_sculpture != null && personinfo.head_sculpture != "") {
+                var largeImage = document.getElementById('head_picture');
+                largeImage.style.display = 'block';
+                largeImage.src = personinfo.head_sculpture + "?" + (new Date()).getTime();
+            }
+            $("#user_name").text(personinfo.username);
+                       
+            $(".quit").on("vmousedown", function(){
+                $(this).css("background", "-webkit-gradient(linear,left top,left bottom,from(#ce2715),to(#f74634))");
+            });
+			
+            $(".quit").on("vmouseup", function(){
+                $(this).css("background", "-webkit-gradient(linear,left top,left bottom,from(#f74634),to(#ce2715))");
+            });
+            
+            $(".my_cancle").on("vmousedown", function(){
+                $(this).css("background", "-webkit-gradient(linear, left top, left bottom, from(#2d2d2d),to(#444))");
+            });
+            $(".my_cancle").on("vmouseup", function(){
+                $(this).css("background", "-webkit-gradient(linear, left top, left bottom, from(#444),to(#2d2d2d))");
+            });
+            
+            $(".cancle").click(function(){
+                $(".choice").hide();
+                closeBg();
+            });
+            
+            $("#clear_cache").on("vclick", function(){
+				clear_cache();
+            });       
+        });
+        
+        function onDeviceReady(){
+            document.addEventListener("menubutton", eventMenuButton, false); //菜单键
+        }
+        
+        function eventMenuButton(){
+            if ($.mobile.activePage.is("#indexPage")) {
+                showBg();
+                $(".choice").show();
+            }   
+        }                       
+    </script>
+    <style type="text/css">
+        .content-head {
+            margin-top: 0px;
+            padding: 0px;
+            background: url(image/background.jpg);
+            height: 250px;
+            width: 100%;
+        }
+        
+        .circle {
+            width: 70px;
+            height: 75px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        
+        .spanstyle {
+            width: 100%;
+            height: 38px;
+            display: block;
+        }
+        
+        .my_cancle {
+            color: white;
+            line-height: 45px;
+            height: 45px;
+            text-shadow: 0 0 10px #afc8e2;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+			background: -webkit-gradient( linear, left top, left bottom, from(#444),to(#2d2d2d));
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+            margin: 0 auto;
+            display: block;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            clear: left;
+            text-align: center;
+            line-height: 45px;
+        }
+        
+        .fullbg {
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 3;
+            position: absolute;
+            left: 0px;
+            top: 0px;
+            width: 0px;
+            height: 0px;
+        }
+        
+        .quit {
+            line-height: 45px;
+            height: 45px;
+            text-shadow: 0 0 10px #afc8e2;
+            -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+			background: -webkit-gradient( linear, left top, left bottom, from(#f74634),to(#ce2715));
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #afc8e2;
+            margin: 0 auto;
+            display: block;
+            -moz-border-radius: 4px;
+            -webkit-border-radius: 4px;
+            border-radius: 4px;
+            font-weight: bold;
+            clear: left;
+            text-align: center;
+        }
+        
+        .choice {
+            position: absolute;
+            padding: 10px 25px;
+            display: none;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            height: 30%;
+            z-index: 5;
+            border-radius: 8px 8px 0px 0px;
+            border-color: rgba(0, 0, 0, .3);
+			background: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)),to(rgba(0, 0, 0, 0.5)), color-stop( 0.6, rgba(0, 0, 0, 0.2)));
+        }
+    </style>
+    <div class="bg_header" data-role="header" data-position="fixed" data-theme="a">
+        <a href="../lwm/setting.html" data-role="button" data-inline="true" data-icon="back" class="ui-btn-left">返回</a>
+        <h1>最新动态</h1>
+        <a href="input.html" data-role="button" data-inline="true" data-icon="Plus" class="ui-btn-right">发布信息</a>
+    </div>
+    <div class="fullbg">
+    </div>
+    <div data-role="content" data-theme="d">
+        <div id="wrapperIndex" class="wrapper1">
+            <div id="scrollerIndex" class="scroller1">
+                <div id="pullDown">
+                    <span class="pullDownIcon"></span>
+                    <span class="pullDownLabel">下拉刷新...</span>
+                </div>
+                <div class="content-head" align="center">
+                    <div class="ui-grid-c" style="padding-top:150px;height:80px;">
+                        <div class="ui-block-a" style="width:25%;height:100%;padding:2px;">
+                            <img src="image/default.png" class="circle" id="head_picture">
+                        </div>
+                        <div class="ui-block-b" style="width:75%;text-align:left;font-weight:bold;color:black;height:100%;padding:2px;">
+                            <span class="spanstyle" style="font-weight:bold;margin-top:10px;font-size:20px;line-height:38px;" id="user_name"></span>
+                        </div>
+                    </div>
+                </div>
+                <ul data-role="listview" id="cl" class="contentList">
+                </ul>
+                <div id="pullUp">
+                    <span class="pullUpIcon"></span>
+                    <span class="pullUpLabel">上拉加载更多...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="choice confirm_quit">
+        <a class="quit" id="clear_cache" data-role="none" style="margin-top: 40px">清除缓存</a>
+        <br>
+        <a class="cancle my_cancle" data-role="none">取消</a>
+    </div>
+</div>

@@ -1,0 +1,38 @@
+<div data-role="page">
+	<script type="text/javascript">
+		$(document).one("pageinit",function()
+		{
+			//alert(sessionget("need_edit"));
+			var need_edit=stringtojson(sessionget("need_edit"));
+			var type=need_edit.type;
+			var edit_type=need_edit.edit_type;
+			$("#edit_type").text("输入"+edit_type);
+			
+			$("#complete").on("vclick",function()
+			{
+				var user_input=$("#user_input").val();
+				if(user_input==null||user_input=="")
+				{
+					alert(edit_type+"不能为空");
+				}
+				
+				else{
+					var personinfo=stringtojson(ssenvoyget("personinfo_temp"));
+					personinfo[type]=user_input;
+					ssenvoyset("personinfo_temp",jsontostring(personinfo));
+				}
+				
+				$.mobile.changePage("info_edit.html");
+			});
+		});
+		
+	</script>
+	<div data-role="header">
+		<a href="info_edit.html">编辑资料</a>
+		<h3 id="edit_type">昵称</h3>
+		<a id="complete">完成</a>
+	</div>
+	<div data-role="content">
+		<input type="text" id="user_input" name="user_input" data-clear-btn="true" autofocus="autofocus">
+	</div>
+</div>

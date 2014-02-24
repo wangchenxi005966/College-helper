@@ -1,0 +1,310 @@
+<div data-role="page" data-add-back-btn="true" id="login_page" class="login_content">
+    <script type="text/javascript">
+        var ErrorInfo;
+        $(document).one("pageinit", function(){
+            new EmailAutoComplete({});
+            //$('input#email').gips({ 'theme': 'purple', text: '邮箱不能为空!',placement: 'top' });
+            var page_width = $("#login_page").width();
+            $(".input_").css("width", page_width - 30);
+            $("#email").css("width", page_width - 76);
+            $("#passwd").css("width", page_width - 76);
+            var personinfo = ssenvoyget("personinfo");
+            if (personinfo != null && personinfo != "") {
+                personinfo = stringtojson(personinfo);
+                $("#email").val(personinfo.email);
+                if (personinfo.head_sculpture != "" &&
+                personinfo.head_sculpture) {
+                    $("#login_touxiang").src = personinfo.head_sculpture;
+                    var largeImage = document.getElementById('login_touxiang');
+                    largeImage.style.display = 'block';
+                    //largeImage.src = imageURI;
+                    largeImage.src = personinfo.head_sculpture +
+                    "?" +
+                    (new Date()).getTime();
+                }
+                
+            }
+            
+            $(window).resize(function(){
+                var page_width = $("#login_page").width();
+                $(".input_").css("width", page_width - 30);
+                $("#email").css("width", page_width - 76);
+                $("#passwd").css("width", page_width - 76);
+            });
+            
+            $("#submit").on("vmousedown", function(){
+                //alert("test");
+                $('#submit').css("background", "-webkit-gradient(linear,left top,left bottom,from(#71c228),to(#75c92a))");
+            });
+            $("#submit").on("vmouseup", function(){
+                $('#submit').css("background", "-webkit-gradient(linear,left top,left bottom,from(#75c92a),to(#71c228))");
+            });
+            $("#submit").click(function(){
+                var email = $("#email").val();
+                var passwd = $("#passwd").val();
+                var emailPattern = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+                if (email == null || email == "") {
+                    alert("邮箱不能为空！");
+                    
+                    return;
+                }
+                if (!emailPattern.test(email)) {
+                    alert("邮箱格式错误！");
+                    return;
+                }
+                
+                if (passwd == null ||
+                passwd == "") {
+                    alert("密码不能为空！");
+                    return;
+                }
+                
+                showloading("登录中······");
+                
+                $.getJSON("http://college-helper-server.wicp.net/login_handler.php?callback=?", {
+                    "email": email,
+                    "passwd": passwd
+                }).done(function(data){
+                    if (data.value == "true") {
+                        //alert(data.personinfo.username);
+                        if (data.personinfo != null &&
+                        data.personinfo != "") {
+                            var personinfo = data.personinfo;
+                            //alert(personinfo.head_sculpture);
+                            if (personinfo.head_sculpture != "" &&
+                            personinfo.head_sculpture != null) {
+                                //alert(personinfo.head_sculpture);
+                                var success = function(FileEntry){                            
+                                    //personinfo=stringtojson(personinfo);
+                                    var imageURI = "http://college-helper-server.wicp.net/image/" +
+                                    personinfo.head_sculpture;
+                                    var uri = encodeURI(imageURI);
+                                    //var fileURI = FileEntry.toURI();
+                                    var filePath = FileEntry.fullPath +
+                                    "/" +
+                                    personinfo.head_sculpture;
+                                    //alert(filePath);
+                                    var fileTransfer = new FileTransfer();
+                                    fileTransfer.download(uri, filePath, function(entry){
+                                        console.log("download complete: " + entry.fullPath);
+                                        personinfo.head_sculpture = filePath;
+                                        var str_personinfo = jsontostring(personinfo);
+                                        ssenvoyset("personinfo", str_personinfo);
+                                        ssenvoyset("personinfo_temp", str_personinfo);
+                                        ssenvoyset("login", "true");
+                                        setTimeout("showloading(\"登录成功！\")", 500);
+                                        setTimeout("hideloading()", 1000);
+                                        setTimeout("$.mobile.changePage('../index.html')", 1100);
+                                    }, function(error){
+                                        console.log("download error source " +
+                                        error.source);
+                                        console.log("download error target " +
+                                        error.target);
+                                        console.log("upload error code" +
+                                        error.code);
+                                        setTimeout("showloading(\"获取个人信息失败！\")", 500);
+                                        setTimeout("hideloading()", 1000);
+                                    }, false, {
+                                        headers: {
+                                            "Authorization": "Basic dGVzdHVzZXJuYW1lOnRlc3RwYXNzd29yZA=="
+                                        }
+                                    });                                                                    
+                                }
+                                
+                                var Fail = function(){
+                                    alert("新建文件失败");
+                                }
+                                var gotFileSystem = function(fileSystem){
+                                    fileSystem.root.getDirectory("college-helper/image", {
+                                        create: true
+                                    }, success, Fail);
+                                };
+                                
+                                var fsFail = function(){
+                                    alert("获取持久化文件系统失败！");
+                                    //window.requestFileSystem(LocalFileSystem.TEMPORARY, 0, gotFileSystem, fs_fail);
+                                }
+                                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFileSystem, fsFail);
+                            }
+                            
+                            else {
+                                var str_personinfo = jsontostring(personinfo);
+                                ssenvoyset("personinfo", str_personinfo);
+                                ssenvoyset("personinfo_temp", str_personinfo);
+                                ssenvoyset("login", true);
+                                setTimeout("showloading(\"登录成功！\")", 500);
+                                setTimeout("hideloading()", 1000);
+                                setTimeout("$.mobile.changePage('../index.html')", 1100);
+                            }
+                            return;
+                        }
+                        
+                        else {
+                            setTimeout("showloading(\"获取个人信息失败！\")", 500);
+                            setTimeout("hideloading()", 1000);
+                            return;
+                        }
+                        
+                    }
+                    ErrorInfo = data.info;
+                    setTimeout("showloading(ErrorInfo)", 500);
+                    setTimeout("hideloading()", 1500);
+                }).fail(function(){
+                    setTimeout("showloading('登陆失败')", 500);
+                    setTimeout("hideloading()", 1500);
+                });
+                
+            });
+        });
+    </script>
+    <style type="text/css">    
+        .circle {
+            width: 80px;
+            height: 80px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+            border-color: black;
+        }
+        
+        .login_content {
+            background-image: url(image/background.jpg);
+        }
+        
+        ul, li {
+            list-style: none;
+        }
+        
+        .parentCls {
+            width: 200px;
+        }
+        
+        .parentCls > ul {
+            background: #ffffff;
+        }
+        
+        .auto-tip li {
+            width: 100%;
+            height: 22px;
+            line-height: 22px;
+            font-size: 14px;
+        }
+        
+        .auto-tip li {
+            text-align: left;
+        }
+        
+        .auto-tip li.hoverBg {
+            background: #ddd;
+            cursor: pointer;
+        }
+        
+        .red {
+            color: red;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .user_pic {
+            margin: 0px;
+            padding: 0px;
+            width: 46px;
+            height: 46px;
+            float: left;
+            display: block;
+            background-image: url(image/user.png);
+            background-repeat: no-repeat;
+        }
+        
+        .passwd_pic {
+            margin: 0px;
+            padding: 0px;
+            width: 46px;
+            height: 46px;
+            float: left;
+            display: block;
+            background-image: url(image/passwd.png);
+            background-repeat: no-repeat;
+        }
+        
+        .input_ >#email {
+            outline: 0 !important;
+            height: 46px;
+            float: left;
+            margin: 0px;
+            padding: 0px;
+            border: 0px;
+            font-size: 18px;
+        }
+        
+        .input_ >#passwd {
+            outline: 0 !important;
+            height: 46px;
+            float: left;
+            margin: 0px;
+            padding: 0px;
+            border: 0px;
+            font-size: 18px;
+            background: transparent;
+        }
+        
+        .about_footer {
+            position: absolute;
+            bottom: 0px;
+            font-size: 10px;
+            width: 100%;
+            color: blue;
+        }
+        
+        #submit {
+            background: -webkit-gradient(linear, left top, left bottom, from(#75c92a),to(#71c228));
+	    	border: 1px solid #40a217;
+	    	-webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #9ed74a;
+	    	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.13), inset 0 1px 1px #9ed74a;
+	    	margin: 0 auto;
+	    	display: block;
+	    	-moz-border-radius: 4px;
+	    	-webkit-border-radius: 4px;
+	    	border-radius: 4px;
+	    	font-weight: bold;
+	    	clear: left;
+	    	height: 45px;
+	    	line-height: 45px;
+	    	text-align: center;
+		}                                                               
+        .my_style {
+         	margin: 3px;
+            padding: 0px;
+        }
+                                                                		
+		.my_a
+		{
+			
+		}    
+    </style>
+    <div data-role="header" data-position="fixed">
+        <a href="../index.html" data-transition="fade" data-icon="back">后退</a>
+        <h3>登陆界面</h3>
+    </div>
+    <div data-role="content" align="center">
+        <div align="center" style="padding-top: 50px; margin-bottom: 20px;">
+            <img src="image/default.png" class="circle" id="login_touxiang">
+        </div>
+        <div style="width: auto; height: 46px; background: white;" class="input_ parentCls">
+            <img src="image/user.png" style="float: left"><input class="inputElem" data-role="none" name="email" id="email" type="email" placeholder="请输入邮箱" data-clear-btn="true">
+        </div>
+        <div style="width: auto; height: 46px; background: white; margin-top: 5px;" class="input_">
+            <img src="image/passwd.png" style="float: left"><input data-role="none" name="passwd" id="passwd" type="password" placeholder="请输入密码" data-clear-btn="true">
+        </div>
+        <br>
+        <br>
+        <a id="submit" data-role="none">登陆</a>
+        <div class="about_footer" align="center">
+            <a href="register.html" class="my_style" style="font-size: 16px;color:blue;">没有账号</a>|<a href="forgetpasswd.html" class="my_style" style="font-size: 16px;color:blue;">忘记密码？</a>
+            <br>
+            <span class="my_style" style="color:black">CopyRight © 2013-20--, TJ Fox.All Rights
+                Reserved.</span>
+        </div>
+    </div>
+</div>

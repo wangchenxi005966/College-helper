@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+	<style type="text/css">            
+		.circle {
+			position:relative;
+			width: 60px;
+			height: 67px;
+			-webkit-border-radius: 7px;
+			border-radius: 7px;
+			margin-top: 6px;
+			margin-left: 0px;
+			margin-right: 0px;
+			padding: 0px;
+		}
+		
+		.login_content {
+			/* background: url(image/background.jpg);*/
+		}
+		
+		.login_form {
+			position:relative;
+			margin-top: 45px;
+			width: 375px;
+			height: 332px;
+			background-image: url(img/login_background.png);
+			background-repeat: no-repeat;
+			padding: 0px;
+			border: 0px;
+			
+		}
+		
+		.input_email {
+			margin-top: 39px;
+			margin-right: 40px;
+			width: 272px;
+			height: 36px;
+			border: 0px;
+			padding: 0px;
+			background: transparent;
+			font-size: 18px;
+			outline:0 !important;
+		}
+		
+		.input_passwd {
+			margin-top: 10px;
+			margin-right: 40px;
+			width: 272px;
+			height: 36px;
+			border: 0px;
+			padding: 0px;
+			background: transparent;
+			font-size: 18px;
+			outline: 0 !important;
+		}
+		
+		#submit {
+			margin-top: 60px;
+			width: 312px;
+			background: -webkit-gradient(linear,left top,left bottom,from(#75c92a),to(#71c228));
+			border: 1px solid #40a217;
+			-webkit-box-shadow: 0 1px 1px rgba(0,0,0,0.13),inset 0 1px 1px #9ed74a;
+			box-shadow: 0 1px 1px rgba(0,0,0,0.13),inset 0 1px 1px #9ed74a;
+			display: block;
+			-moz-border-radius: 4px;
+			-webkit-border-radius: 4px;
+			border-radius: 4px;
+			font-weight: bold;
+			clear: left;
+			height:45px;
+			line-height:45px;
+			text-align:center;
+		 }         
+	</style>
+</head>
+<body style="background-image: url(img/login.jpg);">
+	<script type="text/javascript">
+		var name=$("#name").val();
+	</script>
+	<div id="login_page" class="login_content">
+		<div align="center" style="margin-top:10%">
+			<div class="login_form" align="center">
+				<form name="intFrom" method="post" action="login.php">
+					<img src="img/default.png" class="circle" id="login_touxiang">
+					<input data-role="none" class="input_email" type="text" id="name" name="name" placeholder="请输入用户名">
+					<input data-role="none" class="input_passwd" type="password" id="passwd" name="passwd" placeholder="请输入密码">
+					<input id="submit" data-role="button" value="登陆" type="submit">
+				</form>
+			</div>
+		</div>
+	</div>
+</body>

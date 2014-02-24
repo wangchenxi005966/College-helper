@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+        <meta charset="utf-8" />
+        <link rel="stylesheet" href="../css/jquery.mobile-1.3.2.min.css" />
+        <link rel="stylesheet" href="../mobiscroll/css/mobiscroll.custom-2.6.2.min.css"/>
+        <link rel="stylesheet" href="css/jh.css"/>
+        <script src="../js/cordova.js">
+        </script>
+        <script src="../js/jquery-1.9.1.min.js">
+        </script>
+        <script src="../js/jquery.mobile-1.3.2.min.js">
+        </script>
+        <script src="../mobiscroll/js/mobiscroll.custom-2.6.2.min.js">
+        </script>
+        <script type="text/javascript" src="js/jquery.mobile.simpledialog2.min.js">
+        </script>
+        <script type="text/javascript" src="../lwm/js/global.js">
+        </script>
+        <script src="../js/common.js">
+        </script>
+		<script src="js/common.js"></script>
+        <script src="js/jh.js">
+        </script>
+        <script type="text/javascript" src="js/statusbarnotification.js">
+        </script>
+        <script>
+            setInterval("checkdate()", 60000);
+            $(document).one("pageinit", function(){
+                $("#tongbu").on("vclick", function(){
+                    var personinfo = stringtojson(ssenvoyget("personinfo"));
+                    synchronize("jh_download", personinfo.email)
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <div data-role="page" id="home">
+            <div data-role="header" data-theme="a">
+                <a href="jh_index.html">计划</a>
+                <h3>主页</h3>
+                <a id="tongbu">同步</a>
+            </div>
+            <div data-role="content">
+                <a data-role="button" onclick="window.plugins.statusBarNotification.notify('Put your title here', 'Put your message here');">test</a>
+            </div>
+        </div>
+    </body>
+</html>

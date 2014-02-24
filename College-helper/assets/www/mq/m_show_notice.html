@@ -1,0 +1,333 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_show_notice" data-dom-cache="true">
+    <script type="text/javascript">
+        $("#m_show_notice").on("pagebeforeshow", function(){
+            if (sessionget("init") == null) {
+                sessionset("init", 1);
+            }
+            if (sessionget("init") == 1) {
+                if (isInit == 1) {
+                    myScroll_mq.destroy();
+                    isInit = 0;
+                }
+                
+                setTimeout(initIscroll, 200);
+                sessionset("init", 0);
+            }
+        });
+        function showLoading(){
+            $.mobile.loadingMessageTextVisible = true;
+            $.mobile.showPageLoadingMsg("a", "加载中...");
+        }
+        
+        function hideLoading(){
+            $.mobile.hidePageLoadingMsg();
+        }
+        
+        function showMyAlert(text){
+            $.mobile.loadingMessageTextVisible = true;
+            $.mobile.showPageLoadingMsg("a", text, true);
+        }
+        
+        function myAlert(text){
+            showMyAlert(text);
+            setTimeout(hideLoading, 2000);
+        }
+        
+        var isInit = 0;
+        var myScroll_mq, pullDownOffset_mq, pullUpEl_mq, pullUpOffset_mq, generatedCount = 0;
+        function initIscroll(){
+            if (myScroll_mq != null) {
+                myScroll_mq.destroy();
+            }
+            pullDownEl_mq = document.getElementById("pullDown_mq");
+            pullDownOffset_mq = pullDownEl_mq.offsetHeight;
+            pullUpEl_mq = document.getElementById("pullUp_mq");
+            pullUpOffset_mq = pullUpEl_mq.offsetHeight;
+            snap: true, myScroll_mq = new iScroll("wrapper", {
+                useTransition: false, //是否使用CSS变换
+                useTransform: false,
+                topOffset: pullDownOffset_mq,
+                fixedScrollbar: true,
+                hideScrollbar: true,
+                hScrollbar : false,
+                vScrollbar : false,
+                onRefresh: function(){
+                    if (pullDownEl_mq.className.match("loading")) {
+                        pullDownEl_mq.className = "";
+                        pullDownEl_mq.querySelector(".pullDownLabel_mq").innerHTML = "下拉刷新...";
+                    }
+                    else 
+                        if (pullUpEl_mq.className.match("loading")) {
+                            pullUpEl_mq.className = "";
+                            pullUpEl_mq.querySelector(".pullUpLabel_mq").innerHTML = "上拉加载更多...";
+                        }
+                },
+                onScrollMove: function(){
+                    if (this.y > 5 && !pullDownEl_mq.className.match("flip")) {
+                        pullDownEl_mq.className = "flip"
+                        pullDownEl_mq.querySelector(".pullDownLabel_mq").innerHTML = "松手开始更新...";
+                        this.minScrollY = 0;
+                    }
+                    else 
+                        if (this.y < 5 && pullDownEl_mq.className.match("flip")) {
+                            pullDownEl_mq.className = "";
+                            pullDownEl_mq.querySelector(".pullDownLabel_mq").innerHTML = "下拉刷新...";
+                            this.minScrollY = -pullDownOffset_mq;
+                        }
+                        else 
+                            if (this.y < (this.maxScrollY - 5) &&
+                            !pullUpEl_mq.className.match("flip")) {
+                                pullUpEl_mq.className = "flip";
+                                pullUpEl_mq.querySelector(".pullUpLabel_mq").innerHTML = "松手开始更新...";
+                                this.maxScrollY = this.maxScrollY;
+                            }
+                            else 
+                                if (this.y > (this.maxScrollY + 5) &&
+                                pullUpEl_mq.className.match("flip")) {
+                                    pullUpEl_mq.className = "";
+                                    pullUpEl_mq.querySelector(".pullUpLabel_mq").innerHTML = "上拉加载更多...";
+                                    this.maxScrollY = pullUpOffset_mq;
+                                }
+                },
+                onScrollEnd: function(){
+                    if (pullDownEl_mq.className.match("flip")) {
+                        pullDownEl_mq.className = "loading";
+                        pullDownEl_mq.querySelector(".pullDownLabel_mq").innerHTML = "加载中...";
+                        pullDownAction_mq();
+                    }
+                    else 
+                        if (pullUpEl_mq.className.match("flip")) {
+                            pullUpEl_mq.className = "loading";
+                            pullUpEl_mq.querySelector(".pullUpLabel_mq").innerHTML = "加载中...";
+                            pullUpAction_mq();
+                        }
+                }
+            });
+            sessionset("count", 0);
+            $('.mq').remove();
+            pullDownAction_mq();
+            //display(parseInt(sessionget("count")));
+            sessionset("iscroll", 1);
+            myScroll_mq.refresh();
+            isInit = 1;
+        }
+        
+        function pullDownAction_mq(){
+        
+            setTimeout(update_mq, 1000);
+            
+        }
+        
+        function update_mq()//更新数据
+        {
+            //step1:获取本地localstorage中最新值
+            //step2:从网络端获取最新数据
+            //step3:存入localstorage
+            //step4:输出
+            display_mq(0);
+            var latestinfo = getLatestData();
+            $.getJSON("http://college-helper-server.wicp.net/get_web_content.php?href=" + latestinfo + "&type=forword&callback=?", function(data){
+                pullDownDisplay(data);
+            });
+            myScroll_mq.refresh();
+        }
+        
+        function getLatestData(){
+            if (ssenvoyget("info") != null) {
+                var info_json = stringtojson(ssenvoyget("info"));
+                return stringtojson(info_json[0]).href;
+            }
+            return -1;
+        }
+        
+        function pullDownDisplay(data){
+            if (data.latest == 1) {
+                myAlert("已经是最新消息了");
+            }
+            else {
+                if (data.deltag == 0) {//与本地数据连接，不需要删除
+                    data = data.val;
+                    $.each(data, function(infoIndex, info){
+                        if (ssenvoyget("info") != null) {
+                            var info_array = stringtojson(ssenvoyget("info"));
+                            info_array.splice(0, 0, jsontostring(info));
+                            ssenvoyset("info", jsontostring(info_array));
+                        }
+                        else {
+                            var info_array = new Array();
+                            info_array.splice(0, 0, jsontostring(info));
+                            ssenvoyset("info", jsontostring(info_array));
+                        }
+                    });
+                }
+                else {
+                    //清空原来数据
+                    if (ssenvoyget("info") != null) {
+                        ssenvoyremove("info");
+                    }
+                    data = data.val;
+                    
+                    //填充到本地数据
+                    $.each(data, function(infoIndex, info){
+                        if (ssenvoyget("info") != null) {
+                            var info_array = stringtojson(ssenvoyget("info"));
+                            info_array.splice(0, 0, jsontostring(info));
+                            ssenvoyset("info", jsontostring(info_array));
+                        }
+                        else {
+                            var info_array = new Array();
+                            info_array.splice(0, 0, jsontostring(info));
+                            ssenvoyset("info", jsontostring(info_array));
+                        }
+                    });
+                }
+            }
+            $('.mq').remove();
+            display_mq(0);
+            sessionset("iscroll", 1);
+        }
+        
+        function pullUpAction_mq(){
+            if (sessionget("iscroll") == 1) {
+                setTimeout(loadData_mq, 1000);
+            }
+        }
+        
+        function loadData_mq(){
+            //获取输出的最末端的值
+            //从localstorage中继续输出
+            //var endinfo=getEndInfo();
+            var info_json = stringtojson(ssenvoyget("info"));
+            
+            if (info_json.length == (sessionget("count") - 1)) {
+                var endinfo = getEndData(info_json.length);
+                $.getJSON("http://college-helper-server.wicp.net/get_web_content.php?href=" + endinfo + "&type=back&callback=?", function(data){
+                    pullUpDisplay(data, info_json.length);
+                });
+            }
+            display_mq(parseInt(sessionget("count")));
+        }
+        
+        function getEndData(count){
+            if (ssenvoyget("info") != null) {
+                var info_json = stringtojson(ssenvoyget("info"));
+                return stringtojson(info_json[count - 1]).href;
+            }
+            return -1;
+        }
+        
+        function pullUpDisplay(data, pos){
+            if (data.deltag == 0) {//与本地数据连接，不需要删除
+                data = data.val;
+                $.each(data, function(infoIndex, info){
+                    if (ssenvoyget("info") != null) {
+                        var info_array = stringtojson(ssenvoyget("info"));
+                        info_array.splice(pos, 0, jsontostring(info));
+                        ssenvoyset("info", jsontostring(info_array));
+                    }
+                });
+            }
+            display_mq(pos);
+        }
+        
+        function display_mq(begin){
+            if (ssenvoyget("info") != null) {
+                var info_json = stringtojson(ssenvoyget("info"));
+                var end;
+                if (info_json.length < begin) 
+                    return;
+                else 
+                    if (info_json.length < (begin + 8)) {
+                        end = info_json.length;
+                    }
+                    else 
+                        end = begin + 8;
+                
+                for (var i = begin; i < end; i++) {
+                    var content = "";
+                    content += "<div class=\"mq\" style=\"margin-bottom:50px;\"><h5 class=\"m_title\">" + stringtojson(info_json[i]).time + "</h5>" +
+                    "<ul data-role=\"listview\" data-divider-theme=\"b\" data-inset=\"true\" class=\"m_ul\"" + 
+					"style=\"margin-left:8%;margin-right:8%;margin-bottom:30px;\">" +
+                    "<li data-theme=\"c\" data-icon=\"false\" >" +
+                    "<a href=\"m_show_info.html?href=" +
+                    stringtojson(info_json[i]).href +
+                    "\" data-transition=\"slide\">" +
+                    "<p id=\"info_title\" style=\"font-weight:bold;font-size:15px;\">" +
+                    stringtojson(info_json[i]).title +
+                    "</p>" +
+                    "<p style=\"font-weight:bold;\">========================</p>" +
+                    "<p id=\"info_content\">" +
+                    stringtojson(info_json[i]).content +
+                    "</p></a></li></ul>" +
+                    "</div>";
+                    $(content).insertBefore("#contentList").listview();
+                }
+                $('.m_ul').listview();
+                sessionset("count", (end + 1));
+                myScroll_mq.refresh();
+                setTimeout(function(){
+                    myScroll_mq.refresh();
+                }, 100);
+            }
+        }
+        
+        function clearStorage(){
+            if (ssenvoyget("info") != "") {
+                var notice_info = stringtojson(ssenvoyget("info"));
+                var length = notice_info.length;
+                if (length > 20) {
+                    notice_info.splice(20, length - 20);
+                    ssenvoyset("info", jsontostring(notice_info));
+                }
+            }
+        }
+    </script>
+    <style type="text/css">
+        #mq_pic {
+            overflow: auto;
+            margin-bottom: 20px;
+        }
+        
+        .ui-li-desc {
+            white-space: normal;
+            margin-right: 0px;
+        }
+        
+        .m_title {
+            align: center;
+            margin-left: 130px;
+            width: 90px;
+            background: #d0d0d0
+        }
+        
+        .info_title {
+            font-weight: bold;
+        }
+    </style>
+    <div data-theme="a" data-role="header" class="ui-fixed-hidden" data-position="fixed">
+        <a href="../index.html" data-direction="reverse" onclick="clearStorage()" data-icon="back" data-transition="slide">返回</a>
+        <h3 id="title">学院通知</h3>
+    </div>
+    <div data-role="content">
+        <div id="wrapper">
+            <div id="scroller">
+                <div id="pullDown_mq">
+                    <span class="pullDownIcon"></span>
+                    <span class="pullDownLabel_mq">下拉刷新...</span>
+                </div>
+                <div style="" id="mq_pic">
+                    <img style="width: 100%; height: 180px" src="images/pic6.jpg">
+                </div>
+                <ul style="padding:0px;">
+                    <li id="contentList" data-theme="a" class="contentList">
+                    </li>
+                </ul>
+                <div id="pullUp_mq">
+                    <span class="pullUpIcon"></span>
+                    <span class="pullUpLabel_mq">上拉加载更多...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

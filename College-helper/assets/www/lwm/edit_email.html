@@ -1,0 +1,118 @@
+<div data-role="page">
+    <style type="text/css">
+        .star {
+            color: red;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).one("pageinit", function(){
+			var personinfo=stringtojson(ssenvoyget("personinfo"));
+			$("#old_email").val(personinfo.email);
+			
+            var emailPattern = /^([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+@([a-zA-Z0-9]+[_|\_|\.]?)*[a-zA-Z0-9]+\.[a-zA-Z]{2,3}$/;
+            $("#confirm_edit_email").on("vclick", function(){
+                var old_email = $("#old_email").val();
+               // var personinfo = stringtojson(ssenvoyget("personinfo"));
+                if (old_email == null || old_email == "") {
+                    alert("旧邮箱不能为空！");
+                    return;
+                }
+                if (!emailPattern.test(old_email)) {
+                    alert("旧邮箱格式错误！");
+                    return;
+                }
+                if (personinfo.email != old_email) {
+                    alert("旧邮箱错误！");
+                    return;
+                }
+                var email_passwd = $("#email_passwd").val();
+                if (email_passwd == null || email_passwd == "") {
+                    alert("密码不能为空！");
+                    return;
+                }
+                var new_email = $("#new_email").val();
+                if (new_email == null || new_email == "") {
+                    alert("新邮箱码不能为空！");
+                    return;
+                }
+                if (!emailPattern.test(new_email)) {
+                    alert("旧邮箱格式错误！");
+                    return;
+                }
+                
+                if (old_email == new_email) {
+                    alert("邮箱无改变");
+                    return;
+                }
+                
+                showloading("修改中···");
+                var request = {
+                    "old_email": old_email,
+                    "passwd": email_passwd,
+                    "new_email": new_email
+                };
+                $.ajax({
+                    url: "http://college-helper-server.wicp.net/modify_email.php",
+                    type: "post",
+                    dataType: "jsonp",
+                    jsonp: "callback",
+                    data: request,
+                    success: function(data){
+                        if (data.error == "false") {
+							personinfo.email=new_email;
+							personinfo=jsontostring(personinfo.email);
+							ssenvoyset("personinfo",personinfo);
+							ssenvoyset("personinfo_temp",personinfo);
+                            setTimeout("showloading(\"修改成功！\")", 500);
+                            setTimeout("hideloading()", 1000);
+							setTimeout("$.mobile.changePage('login.html')", 1600);
+                            //alert("修改成功");
+                        }
+                        else {
+                            //alert(data.message);
+                            setTimeout("showloading('" + data.message + "')", 500);
+                            setTimeout("hideloading()", 1000);
+                        }
+                        
+                    },
+                    fail: function(){
+                        //alert("修改失败");
+                        setTimeout("showloading(\"修改失败！\")", 500);
+                        setTimeout("hideloading()", 1000);
+                    }
+                });
+            });
+        });
+    </script>
+    <div data-role="header">
+        <a href="myaccount.html" data-icon="back">返回</a>
+        <h3>编辑账号</h3>
+    </div>
+    <div data-role="content">
+        <ul data-role="listview" data-inset="true">
+            <li data-role="fieldcontain">
+                <label for="old_email">
+                    旧账号<span class="star">*</span>
+                </label>
+                <input type="email" id="old_email" name="old_email" data-clear-btn="true" value="" required>
+            </li>
+            <li data-role="fieldcontain">
+                <label for="email_passwd">
+                    密码<span class="star">*</span>
+                </label>
+                <input type="password" name="email_passwd" id="email_passwd" data-clear-btn="true" value="" required>
+            </li>
+        </ul>
+        <br/>
+        <ul data-role="listview" data-inset="true" data-inline="true">
+            <li data-role="fieldcontain">
+                <label for="new_email">
+                    新账号<span class="star">*</span>
+                </label>
+                <input type="email" name="new_email" id="new_email" data-clear-btn="true" value="" required>
+            </li>
+        </ul>
+        <br>
+        <input type="button" value="确认" id="confirm_edit_email">
+    </div>
+</div>

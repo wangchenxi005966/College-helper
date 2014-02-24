@@ -1,0 +1,64 @@
+<meta charset="utf-8">
+<div data-role="page" id="duanbo_page">
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $.getJSON("http://college-helper-server.wicp.net/detail_car.php?callback=?", function(data){
+                var count1 = 0;
+                var count2 = 0;
+                var length;
+                $.each(data, function(infoIndex, info){
+                    if (info["way"] == "出发") {
+                        count1++;
+                    }
+                    else {
+                        count2++;
+                    }
+                });
+                if (count1 >= count2) {
+                    length = count1;
+                }
+                else {
+                    length = count2;
+                }
+                for (var i = 1; i <= length; i++) {
+                    $("#duanbo").append("<tr id=\"" + i + "\"><td>&nbsp</td><td>&nbsp</td></tr>");
+                }
+                var num1 = 1;
+                var num2 = 1;
+                $.each(data, function(infoIndex, info){
+                    if (info["way"] == "出发") {
+                        var tr = document.getElementById(num1);
+                        tr.cells[0].innerText = info["time"];
+                        num1++;
+                    }
+                    else {
+                        var tr = document.getElementById(num2);
+                        tr.cells[1].innerText = info["time"];
+                        num2++;
+                    }
+                });
+            });
+        });
+    </script>
+    <div data-role="header" data-theme="a" data-position="fixed">
+        <a href="tran.html" data-transition="slide" data-role="button" data-inline="true" data-icon="back">返回</a>
+        <h2>校园助手</h2>
+    </div>
+    <div data-role="content">
+        <h3 style="text-align:center">短驳车发车时刻表</h3>
+        <table width="100%">
+            <tr>
+                <td>
+                    出发
+                </td>
+                <td>
+                    返回
+                </td>
+            </tr>
+        </table>
+        <table width="100%" border="1" id="duanbo">
+        </table>
+    </div>
+    <div data-role="footer" data-theme="a" data-position="fixed" data-tap-toggle="false">
+    </div>
+</div>

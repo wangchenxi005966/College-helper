@@ -1,0 +1,571 @@
+<div data-role="page" id="info_edit_page" class="bg_page">
+    <style type="text/css">    
+        .edit_liimg {
+            width: 55px;
+            height: 55px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        
+        .label_text {
+            font-size: 15px;
+            padding-left: 8px;
+        }
+        
+        .mytable {
+            width: 100%;
+            height: 100%;
+            border: none;
+            /*background-image:linear-gradient(#f1f1f1,#fff);*/
+        }
+        
+        .myicon {
+            display: block;
+            width: 18px;
+            height: 18px;
+            background-image: url(../css/images/icons-18-black.png);
+            background-repeat: no-repeat;
+            background-position: -108px -1px;
+        }
+        
+        .choice {
+            position: absolute;
+            padding: 10px 25px;
+            display: none;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            height: 30%;
+            z-index: 5;
+            border-radius: 8px 8px 0px 0px;
+            border-color: rgba(0, 0, 0, .3);
+            background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.8)),
+            		to(rgba(0, 0, 0, 0.8)), color-stop(0.6, rgba(0, 0, 0, 0.2)));
+            }
+            
+            .tr_text {
+            	height: 40px;
+            }
+            
+            .span_text {
+            	margin-right: 5px;
+            	color: blue;
+            }
+            
+            .showtext_1 {
+            	border: none;
+            	text-align: right;
+            	margin: 0px;
+            	padding: 0px;
+            	width: 100%;
+            	color: blue;
+            	height: 100%;
+            	background: #eee;
+            	font-size: 15px;
+            }
+            
+            .fullbg {
+            	background: rgba(0, 0, 0, 0.5);
+            	display: none;
+            	z-index: 3;
+            	position: absolute;
+            	left: 0px;
+            	top: 0px;
+            	width: 0px;
+            	height: 0px;
+            }
+            
+            .myli {
+            	background-image: linear-gradient(#f1f1f1, #fff);
+            }
+        
+                                    
+                            
+                    
+            
+    </style>
+    <script type="text/javascript">
+        var pictureSource;
+        var destinationType;
+        var Modify_Times = 0;
+        
+        function onDeviceReady(){
+            pictureSource = navigator.camera.PictureSourceType;
+            destinationType = navigator.camera.DestinationType;
+        }
+        
+        function onPhotoURISuccess(imageURI){
+            var largeImage = document.getElementById('head_sculpture');
+            largeImage.style.display = 'block';
+            largeImage.src = imageURI;
+            var personInfo = stringtojson(ssenvoyget("personinfo_temp"));
+            personInfo.head_sculpture = imageURI;
+            ssenvoyset("personinfo_temp", jsontostring(personInfo));
+        }
+        
+        function fsFail(error){
+            //alert(error.code);
+            alert("获取图片文件失败");
+        }
+        
+        function CopyPicture(imageURI){
+            var imgFileName = imageURI.substr(imageURI.lastIndexOf('/') + 1);
+            var imgPath = "tmp/" + imgFileName;
+            console.log(imgFileName);
+            //alert(imgFileName);
+            var gotFileEntry = function(fileEntry){
+                console.log("got image file entry: " + fileEntry.fullPath);
+                //alert(fileEntry.fullPath);
+                var success = function(entry){
+                    var str = fileEntry.fullPath;
+                    //alert(str);
+                    var FileName = str.substr(str.lastIndexOf('/') + 1);
+                    var NewFileName = "head_sculpture." +
+                    FileName.substr(FileName.lastIndexOf('.') + 1);
+                    //alert(NewFileName);
+                    fileEntry.copyTo(entry, NewFileName, copiedFile, fsFail);
+                }
+                var gotFileSystem = function(fileSystem){
+                    fileSystem.root.getDirectory("college-helper/image", {
+                        create: true,
+                        exclusive: false
+                    }, success, fsFail);
+                };
+                window.requestFileSystem(LocalFileSystem.PERSISTENT, 0, gotFileSystem, fsFail);
+            };
+            window.resolveLocalFileSystemURI(imageURI, gotFileEntry, fsFail);
+        }
+        
+        function copiedFile(fileEntry){
+            console.log("copied file: " + fileEntry.fullPath);
+            var personInfo = stringtojson(ssenvoyget("personinfo_temp"));
+            personInfo.head_sculpture = fileEntry.toURI();
+            ssenvoyset("personinfo_temp", jsontostring(personInfo));
+            ssenvoyset("personinfo", jsontostring(personInfo));
+        }
+        
+        function capturePhotoEdit(){
+            $(".choice").hide();
+            closeBg();
+            
+            navigator.camera.getPicture(onPhotoURISuccess, onFail, {
+                quality: 20,
+                destinationType: destinationType.FILE_URI
+            });
+        }
+        
+        function getPhoto(source){
+            $(".choice").hide();
+            closeBg();
+            navigator.camera.getPicture(onPhotoURISuccess, onFail, {
+                quality: 20,
+                destinationType: destinationType.FILE_URI,
+                sourceType: source
+            });
+        }
+        
+        function uploadPicture(imageURI){
+            if (Modify_Times == 0) {
+                showloading("正在上传图片···");
+            }
+            var gotFileName = function(fileentry){
+                var str = fileentry.fullPath;
+                var FileName = str.substr(str.lastIndexOf('/') + 1);
+                var NewFileName = "head_sculpture." +
+                FileName.substr(FileName.lastIndexOf('.') + 1);
+                var personinfo = stringtojson(ssenvoyget("personinfo_temp"));
+                options = new FileUploadOptions();
+                options.params = {
+                    "id": personinfo.id
+                };
+                options.fileKey = "file";
+                options.chunkedMode = false;
+                options.fileName = NewFileName;
+                options.mimeType = "image/jpeg";
+                
+                var ft = new FileTransfer();
+                //var deferred=when.
+                ft.upload(imageURI, encodeURI("http://college-helper-server.wicp.net/changeInfo.php"), function(result){
+                    var response = stringtojson(result.response);                 
+                    if (response.error == "false") {
+                        CopyPicture(imageURI);
+                        $.ajax({
+                            url: "http://college-helper-server.wicp.net/changeInfo.php",
+                            type: "post",
+                            dataType: "jsonp",
+                            jsonp: "callback",
+                            data: personinfo,
+                            success: function(data){
+                                if (data.error == "false") {
+                                    setTimeout("showloading(\"修改成功！\")", 500);
+                                    setTimeout("hideloading()", 1000);
+                                    ssenvoyset("personinfo", jsontostring(personinfo));
+									setTimeout("$.mobile.changePage('personinfo.html')", 1100);
+                                    //alert("修改成功");
+                                }
+                                else {
+                                    //alert(data.message);
+                                    setTimeout("showloading('" + data.message + "')", 500);
+                                    setTimeout("hideloading()", 1000);
+                                }
+                                
+                            },
+                            fail: function(){
+                                //alert("修改失败");
+                                setTimeout("showloading(\"修改失败！\")", 500);
+                                setTimeout("hideloading()", 1000);
+                            }
+                        });
+                    }
+                    else {
+                        setTimeout("showloading('" + response.message + "')", 500);
+                        setTimeout("hideloading()", 1000);
+                    }
+                    
+                }, function(error){
+                    //deferred.resolve(imageURI);
+                    console.log("upload error source " + error.source);
+                    console.log("upload error target " + error.target);
+                    if (Modify_Times != 10) {
+                        Modify_Times++;
+                        var personinfo = stringtojson(ssenvoyget("personinfo_temp"));
+                        //setTimeout("uploadPicture('" + personinfo.head_sculpture + "')", 1500);
+                        uploadPicture(personinfo.head_sculpture);
+                    }
+                    else {
+                        Modify_Times = 0;
+                        //setTimeout("showloading(\"修改失败！\")", 500);
+                        //setTimeout("hideloading()", 1000);
+                        switch (error.code) {
+                            case FileTransferError.FILE_NOT_FOUND_ERR:
+                                //alert("图片文件未发现");
+                                setTimeout("showloading(\"图片文件未发现！\")", 500);
+                                setTimeout("hideloading()", 1500);
+                                break;
+                            case FileTransferError.INVALID_URL_ERR:
+                                //alert("文件上传地址无效");
+                                setTimeout("showloading(\"文件上传地址无效！\")", 500);
+                                setTimeout("hideloading()", 1500);
+                                break;
+                            case FileTransferError.CONNECTION_ERR:
+                                //alert("链接错误,http_satus=" + error.http_status);
+                                var error = "链接错误,上传失败";
+                                setTimeout("showloading('" + error + "')", 500);
+                                setTimeout("hideloading()", 1500);
+                                break;
+                        }
+                    }
+                    
+                    
+                }, options);
+            }
+            window.resolveLocalFileSystemURI(imageURI, gotFileName, fsFail);
+            //return deferred.promise;
+        }
+        
+        function onFail(message){
+            alert("获取摄像头或图片库失败！");
+        }
+        
+        $(document).one("pageinit", function(){
+            var now = new Date();
+            document.addEventListener("deviceready", onDeviceReady, false);
+            
+            var personInfo = stringtojson(ssenvoyget("personinfo_temp"));
+            
+            if (personInfo.head_sculpture != null &&
+            personInfo.head_sculpture != "") {
+                var largeImage = document.getElementById('head_sculpture');
+                largeImage.style.display = 'block';
+                //largeImage.src = imageURI;
+                largeImage.src = personInfo.head_sculpture +
+                "?" +
+                (new Date()).getTime();
+            }
+            
+            $("#username").text(personInfo.username);
+            
+            if (personInfo.sex != null && personInfo.sex != "") {
+                $("#sex").text(personInfo.sex);
+            }
+            
+            if (personInfo.school != null &&
+            personInfo.school != "") {
+                $("#school").text(personInfo.school);
+            }
+            
+            if (personInfo.college != null &&
+            personInfo.college != "") {
+                $("#college").text(personInfo.college);
+            }
+            
+            if (personInfo.major != null &&
+            personInfo.major != "") {
+                $("#major").text(personInfo.major);
+            }
+            
+            if (personInfo.birthday != null &
+            personInfo.birthday != "") {
+                $("#birthday").text(personInfo.birthday);
+            }
+            //触摸事件
+            $(".myli").on("vmousedown", function(){
+                $(this).css('background', '#0000FF');
+            });
+            $(".myli").on("vmouseup", function(){
+                $(this).css('background', '#eee');
+            });
+            $("#back_").on("vclick", function(){
+                var user_info = ssenvoyget("personinfo");
+                ssenvoyset("personinfo_temp", user_info);
+                $.mobile.changePage("personinfo.html");
+            });
+            
+            //信息修改
+            $("#touxiang_li").on("vclick", function(){
+                showBg();
+                $("#select_image").show();
+            });
+            
+            $("#sex_li").on("vclick", function(){
+                var current_sex = $("#sex").text();
+                if (current_sex != "···") {
+                    $(":input[name='sex',value='" +
+                    current_sex +
+                    "']").attr("checked", "checked");
+                }
+                
+                showBg();
+                $("#select_sex").show();
+            });
+            
+            $(".cancle").click(function(){
+                $(".choice").hide();
+                closeBg();
+            });
+            
+            $(":input[name='sex']").change(function(){
+                var select_sex = $(this).val();
+                $("#sex").text(select_sex);
+                personInfo.sex = select_sex;
+                ssenvoyset("personinfo_temp", jsontostring(personInfo));
+                setTimeout("$('.choice').hide();", 100);
+                setTimeout("closeBg();", 110);
+                
+            });
+            
+            $(".birthday_li").on("vclick", function(){
+                //showBg();
+                $('#birthday_input').mobiscroll("show");
+            });
+            $('#birthday_input').mobiscroll().date({
+                theme: 'android-ics light',
+                lang: 'zh',
+                display: 'bottom',
+                mode: 'mixed',
+                dateFormat: "yy/mm/dd",
+                maxDate: now,
+                width: 90,
+                dateOrder: 'yymmdd',
+                onSelect: function(text, inst){
+                    //event.stopPropagation();
+                    
+                    $("#birthday").text(text);
+                    personInfo.birthday = text;
+                    ssenvoyset("personinfo_temp", jsontostring(personInfo));
+                }
+            });
+            
+            $(".need_edit").click(function(){
+            
+                var edit_type = $(this).find("td.label_text").text();
+                var type = $(this).find("span.span_text").attr("id");
+                var need_edit = {
+                    "type": type,
+                    "edit_type": edit_type.trim()
+                };
+                sessionset("need_edit", jsontostring(need_edit));
+                $.mobile.changePage("edit.html");
+            });
+            
+            $("#confirm").on("vclick", function(){
+                var personInfo_temp = stringtojson(ssenvoyget("personinfo_temp"));
+                var personInfo = stringtojson(ssenvoyget("personinfo"));
+                //alert(personInfo.head_sculpture + " " + personInfo_temp.head_sculpture);
+                if (personInfo.head_sculpture != personInfo_temp.head_sculpture) {
+					clear_cache();
+                    uploadPicture(personInfo_temp.head_sculpture);
+                    //CopyPicture(personInfo_temp.head_sculpture);
+                }
+                else {
+                    showloading("上传资料中···");
+                    $.ajax({
+                        url: "http://college-helper-server.wicp.net/changeInfo.php",
+                        type: "post",
+                        dataType: "jsonp",
+                        jsonp: "callback",
+                        data: personInfo_temp,
+                        success: function(data){
+                            if (data.error == "false") {
+                                setTimeout("showloading(\"修改成功！\")", 500);
+                                setTimeout("hideloading()", 1000);
+                                ssenvoyset("personinfo", jsontostring(personInfo_temp));
+								setTimeout("$.mobile.changePage('personinfo.html')", 1100);
+                                //alert("修改成功");
+                            }
+                            else {
+                                //alert(data.message);
+                                setTimeout("showloading('" + data.message + "')", 500);
+                                setTimeout("hideloading()", 1000);
+                            }
+                            
+                        },
+                        fail: function(){
+                            //alert("修改失败");
+                            setTimeout("showloading(\"修改失败！\")", 500);
+                            setTimeout("hideloading()", 1000);
+                        }
+                    });
+                }
+                
+            });
+            
+        });
+    </script>
+    <div data-role="header" id="header" class="bg_header">
+        <a href="#" id="back_" data-transition="fade" data-icon="back">后退</a>
+        <h3>编辑资料</h3>
+    </div>
+    <div class="fullbg">
+    </div>
+    <div data-role="content" id="content">
+        <ul data-role="listview" data-inset="true" data-inline="true">
+            <li data-role="fieldconain" style="padding: 1px;" class="myli" id="touxiang_li">
+                <table class="mytable">
+                    <tr>
+                        <td width="25%" class="label_text">
+                            头像
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px; padding-right: 5px;">
+                            <img id="head_sculpture" src="image/default.png" class="edit_liimg">
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldconain" style="padding: 1px;" class="myli need_edit">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            昵称
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="username">(●'◡'●)ﾉ♥</span>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldconain" style="padding: 1px;" class="myli" id="sex_li">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            性别
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="sex">···</span>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldconain" style="padding: 1px;" class="myli birthday_li">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            生日
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="birthday">···</span>
+                            <input class="showtext_1" style="display: none;" type="text" id="birthday_input" name="birthday_input" data-role="none" readonly/>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+        <ul data-role="listview" data-inset="true" data-inline="true">
+            <li data-role="fieldconain" style="padding: 1px;" class="myli need_edit" id="sex_li">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            学校
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="school">···</span>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldconain" style="padding: 1px;" class="myli need_edit">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            学院
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="college">···</span>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+            <li data-role="fieldconain" style="padding: 1px;" class="myli need_edit">
+                <table class="mytable">
+                    <tr class="tr_text">
+                        <td width="25%" class="label_text">
+                            专业
+                        </td>
+                        <td width="65%" align="right" style="line-height: 1px;">
+                            <span class="span_text" id="major">···</span>
+                        </td>
+                        <td width="10%" align="center">
+                            <span class="myicon"></span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+        </ul>
+        <input type="button" name="confirm" id="confirm" value="确认修改" data-theme="e">
+    </div>
+    <div id="select_image" class="choice">
+        <input type="button" value="从相册中选取" onclick="getPhoto(pictureSource.PHOTOLIBRARY);"><input type="button" value="拍照" onclick="capturePhotoEdit();">
+        <br>
+        <input type="button" value="取消" data-theme="a" class="cancle">
+    </div>
+    <div id="select_sex" class="choice" data-iconpos="right">
+        <fieldset data-iconpos="right">
+            <label>
+                <input type="radio" name="sex" value="男" checked="checked" class="sex_">男
+            </label>
+            <label>
+                <input type="radio" name="sex" value="女" class="sex_">女
+            </label>
+            <br>
+            <input type="button" value="取消" data-theme="a" class="cancle">
+        </fieldset>
+    </div>
+</div>

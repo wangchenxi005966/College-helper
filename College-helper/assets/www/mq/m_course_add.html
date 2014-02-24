@@ -1,0 +1,355 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_course_add">
+	<script type="text/javascript">
+		$(document).ready(function(){
+			init();
+		});
+		var count=0;
+		var del=0;
+		var total=0;
+		var arr_data={"周一":"周一","周二":"周二","周三":"周三","周四":"周四","周五":"周五","周六":"周六","周日":"周日"};
+		var arr_class={"第1节":"第1节","第2节":"第2节","第3节":"第3节","第4节":"第4节","第5节":"第5节"};
+		var arr_week={"1-17周":"1-17周","单周":"单周","双周":"双周"};
+		$(function(){
+		    $(".m_course_time").mobiscroll().scroller({
+		        theme: "ios",
+		        display: "bottom",
+		        mode: "scroller",
+		        lang: "zh",
+		        inputClass: "i-txt",
+		        width: 70,
+		        wheels: [{"mas1": arr_data,
+				"mas2":arr_class}]
+		    });
+			$(".m_course_week").mobiscroll().scroller({
+		        theme: "ios",
+		        display: "bottom",
+		        mode: "scroller",
+		        lang: "zh",
+		        inputClass: "i-txt",
+		        width: 70,
+		        wheels: [{"mas1": arr_week}]
+		    });
+	    });
+		function init(){
+			if(sessionget("course_time")!=""){
+				$(".mq_tr").eq(0).find("input").eq(1).val(sessionget("course_time"));
+			}
+		}
+		function deletetr(index){
+			$(".mq_tr").eq(index).remove();
+			for(var i=index+1;i<=count;i++){
+				var nowid=$(".mq_tr").eq(i-1).find("span").html();
+				$(".mq_tr").eq(i-1).find("td").eq(0).find("img").eq(0).attr("onclick","deletetr("+(nowid-2)+")");
+				$(".mq_tr").eq(i-1).find("td").eq(1).find("ul").eq(0).find("li").eq(0).find("table").eq(0).find("tr").eq(0).find("td").eq(0).find("span").text(nowid-1);
+				$(".mq_tr").listview();
+			}
+			count--;
+		}
+		
+		function save(){//1.先判断每个空格是否填充数据
+			if($("#course_name").val()==""){
+				alert("数据不完整");
+				return;
+			}
+			else{
+				for(var i=0;i<=count;i++){
+					if($(".mq_tr").eq(i).find("input").eq(0).val()==""||$(".mq_tr").eq(i).find("input").eq(1).val()==""||$(".mq_tr").eq(i).find("input").eq(2).val()=="")
+					{
+						alert("数据不完整");
+						return;
+					}
+					if(i<count){
+						if($(".mq_tr").eq(i).find("input").eq(1).val()==$(".mq_tr").eq(i+1).find("input").eq(1).val()){
+							alert("上课时间不能重复");
+							return;
+						}
+					}
+				}
+				//保存数据
+				var user=ssenvoyget("user");
+				for(var i=0;i<=count;i++){
+					if(ssenvoyget("course")!=null){
+						var course_list=stringtojson(ssenvoyget("course"));
+						if(!search_course($(".mq_tr").eq(i).find("input").eq(1).val(),$(".mq_tr").eq(i).find("input").eq(0).val(),course_list)){
+							alert($(".mq_tr").eq(i).find("input").eq(1).val()+"已存在");
+							return;
+						}
+						else{//不冲突，直接存储
+							var course_str=jsontostring({"time":$(".mq_tr").eq(i).find("input").eq(1).val(),
+								"name":$("#course_name").val(),"week":$(".mq_tr").eq(i).find("input").eq(0).val(),
+								"classroom":$(".mq_tr").eq(i).find("input").eq(2).val(),
+								"teacher_name":$("#m_teacher_name").val(),"teacher_tel":$("#m_teacher_tel").val(),
+								"teacher_mail":$("#m_teacher_mail").val(),"zhujiao_name":$("#m_zhujiao_name").val(),
+								"zhujiao_tel":$("#m_zhujiao_tel").val(),"zhujiao_mail":$("#m_zhujiao_mail").val(),
+								"beizhu":$("#m_beifen").val(),"syn":"uplode","old_time":"","old_week":""});
+							course_list.push(course_str);
+							ssenvoyset("course",jsontostring(course_list));
+							goTo("m_course_index.html");
+						}
+					}
+					else{
+						var course_list=new Array();
+						var course_str=jsontostring({"time":$(".mq_tr").eq(i).find("input").eq(1).val(),
+							"name":$("#course_name").val(),"week":$(".mq_tr").eq(i).find("input").eq(0).val(),
+							"classroom":$(".mq_tr").eq(i).find("input").eq(2).val(),
+							"teacher_name":$("#m_teacher_name").val(),"teacher_tel":$("#m_teacher_tel").val(),
+							"teacher_mail":$("#m_teacher_mail").val(),"zhujiao_name":$("#m_zhujiao_name").val(),
+							"zhujiao_tel":$("#m_zhujiao_tel").val(),"zhujiao_mail":$("#m_zhujiao_mail").val(),
+							"beizhu":$("#m_beifen").val(),"syn":"uplode","old_time":"","old_week":""});
+						course_list.push(course_str);
+						ssenvoyset("course",jsontostring(course_list));
+						goTo("m_course_index.html");
+					}
+				}
+			}
+		}
+		 
+		function changePage()
+		{
+			goTo("m_kechen.html");
+			setTimeout(function() { 			
+				hideLoadings();
+			}, 1500);
+		}
+
+		function add()
+		{
+			if(count>=2)
+			{
+				alert("最多3个");
+				return;
+			}
+			count++;
+			var content=
+			"<tr class=\"mq_tr\"><td width=\"30px\"><img type=\"image\" src=\"images/src/icon_close.png\" data-role=\"none\" onclick=\"deletetr("+count+")\">"+
+			"</td><td><ul class=\"m_course\" data-role=\"listview\" style=\"margin-top:0px;margin-bottom:5px;\" "+
+			"data-divider-theme=\"e\" data-inset=\"true\" >"+
+			"<li><table><tr><td style=\"border-right:1px solid #444;\">上 </br>课</br>时</br>间</br><span align=\"right\">"+(count+1)+"</span></br>"+
+			"</td><td><table><tr><td width=\"20%\"><img src=\"images/src/monitor.png\"></td><td>"+
+			"<div class=\"ui-input-text ui-shadow-inset ui-corner-all ui-btn-shadow ui-body-c ui-mini\">"+
+			"<input class=\"m_course_week ui-input-text ui-body-c\" name=\"m_demo\" data-mini=\"true\" class=\"i-txt\" placeholder=\"点击输入周次\"/></div>"+
+			"</td></tr><tr><td><img src=\"images/src/clock.png\"></td><td>"+
+			"<div class=\"ui-input-text ui-shadow-inset ui-corner-all ui-btn-shadow ui-body-c ui-mini\">"+
+			"<input class=\"m_course_time ui-input-text ui-body-c\""+
+			"data-mini=\"true\" class=\"i-txt\" placeholder=\"点击输入时间\"/></div></td></tr><tr><td>"+
+			"<img src=\"images/src/icon_building.png\"></td><td>"+
+			"<div class=\"ui-input-text ui-shadow-inset ui-corner-all ui-btn-shadow ui-body-c ui-mini\">"+
+			"<input class=\"m_course_room ui-input-text ui-body-c\" name=\"m_demo\" data-mini=\"true\""+
+			"class=\"i-txt\" placeholder=\"点击输入教室\"/></div></td></tr></table></td></tr></table></li></ul></td></tr>";
+			$(content).insertBefore("#addbutton").listview();
+			$(".m_course").listview();	
+			
+		    $(".m_course_time").mobiscroll().scroller({
+		        theme: "ios",
+		        display: "bottom",
+		        mode: "scroller",
+		        lang: "zh",
+		        inputClass: "i-txt",
+		        width: 70,
+		        wheels: [{"mas1": arr_data,
+				"mas2":arr_class}]
+		    });
+			$(".m_course_week").mobiscroll().scroller({
+		        theme: "ios",
+		        display: "bottom",
+		        mode: "scroller",
+		        lang: "zh",
+		        inputClass: "i-txt",
+		        width: 70,
+		        wheels: [{"mas1": arr_week}]
+		    });
+		}
+	</script>
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<a href="m_course_index.html" data-direction="reverse" data-icon="back" data-transition="slide">取消</a>
+		<h3 id="title">添加课程</h3>	
+		<a onclick="save()" data-direction="reverse" data-icon="back" data-transition="slide">添加</a>
+	</div>
+	<div data-role="content" >
+		<div >
+			<ul data-role="listview" data-divider-theme="b" data-inset="true" style="margin-top:0px;margin-left:2px;margin-right:2px;">
+				<li data-theme="d" data-icon="false" >
+					<table id="mq_table">
+						<tr >
+							<td width="30px" style="border-bottom:3px solid orange;">
+								<img src="images/src/home.png">
+							</td>
+							<td style="border-bottom:3px solid orange;">课程信息
+							</td>
+						</tr>
+						<tr height="30px">
+							<td width="30px">
+								<img src="images/src/search.png">
+							</td>
+							<td>								
+								<input type="text" name="enginnum" id="course_name" data-mini="true" placeholder="请输入课程名称">
+							</td>
+						</tr>
+						<tr class="mq_tr">
+							<td width="30px">
+							</td>
+							<td><ul data-role="listview" data-divider-theme="e" data-inset="true" style="margin-top:5px;margin-bottom:5px">
+									<li>
+										<table>
+											<tr>
+												<td style="border-right:1px solid #444;">
+													上 </br>课</br>时</br>间</br><span align="right">1</span></br>
+												</td>
+												<td>
+													<table>
+														<tr>
+															<td width="20%">
+																<img src="images/src/monitor.png">								
+															</td>
+															<td>
+																<input class="m_course_week" name="m_demo" data-mini="true" class="i-txt"  placeholder="点击输入周次"/>
+															</td>
+														</tr>
+														<tr>
+															<td>
+																<img src="images/src/clock.png">
+															</td>
+															<td>
+																<input class="m_course_time" name="m_demo" data-mini="true" value="" class="i-txt" placeholder="点击输入时间"/>
+															</td>
+														</tr>
+														<tr>
+															<td>
+																<img src="images/src/icon_building.png">
+															</td>
+															<td>
+																<input class="m_course_room" name="m_demo" data-mini="true" value="" class="i-txt" placeholder="点击输入教室"/>
+															</td>
+														</tr>
+													</table>
+												</td>
+											</tr>
+										</table>
+									</li>
+								</ul>
+							</td>
+						</tr>
+						<tr height="30px" id="addbutton">
+							<td width="30px">
+								<input type="image" src="images/src/add.png" data-role="none" onclick="add()">
+							</td>
+							<td>								
+								<input type="button" onclick="add()" value="添加更多课程时间" />
+							</td>
+						</tr>
+					</table>
+				</li>
+			</ul>
+			<ul data-role="listview" data-divider-theme="b" data-inset="true" style="margin-top:8px;margin-left:2px;margin-right:2px;">
+				<li data-theme="d" data-icon="false" >
+					<table id="mq_table">
+						<tr width="100%">
+							<td width="30px" style="border-bottom:3px solid orange;">
+								<img src="images/src/teacher.png">
+							</td>
+							<td style="border-bottom:3px solid orange;">教师信息
+							</td>
+						</tr>
+						<tr>
+							<td width="30px">
+							</td>
+							<td>
+							<ul data-role="listview" data-divider-theme="e" data-inset="true" style="margin-top:5px;margin-bottom:0px;">
+									<li>
+								<table>
+									<tr style="width:100%">
+										<td width="30px">
+											<img src="images/src/assistant.png">								
+										</td>
+										<td>
+											<input id="m_teacher_name" type="text" placeholder="输入教师姓名"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<img src="images/src/icon_phone.png">
+										</td>
+										<td>
+											<input id="m_teacher_tel" type="tel" placeholder="输入教师电话"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<img src="images/src/icon_mail.png">
+										</td>
+										<td>
+											<input id="m_teacher_mail" type="email" placeholder="输入教师邮箱"/>
+										</td>
+									</tr>
+								</table>
+								</li>
+								</ul>
+							</td>
+						</tr>
+						<tr >
+							<td width="30px" style="border-bottom:3px solid orange;">
+								<img src="images/src/teacher.png">
+							</td>
+							<td style="border-bottom:3px solid orange;">助教信息
+							</td>
+						</tr>
+						<tr>
+							<td width="30px">
+							</td>
+							<td>
+							<ul data-role="listview" data-divider-theme="e" data-inset="true" style="margin-top:5px;margin-bottom:0px;">
+									<li>
+								<table>
+									<tr>
+										<td width="30px">
+											<img src="images/src/assistant.png">								
+										</td>
+										<td>
+											<input id="m_zhujiao_name" type="text" placeholder="输入助教姓名"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<img src="images/src/icon_phone.png">
+										</td>
+										<td>
+											<input id="m_zhujiao_tel" type="tel" placeholder="输入助教电话"/>
+										</td>
+									</tr>
+									<tr>
+										<td>
+											<img src="images/src/icon_mail.png">
+										</td>
+										<td>
+											<input id="m_zhujiao_mail" type="email" placeholder="输入助教邮箱"/>
+										</td>
+									</tr>
+								</table>
+								</li>
+								</ul>
+							</td>
+						</tr>
+					</table>
+				</li>
+			</ul>
+			<ul data-role="listview" data-divider-theme="b" data-inset="true" style="margin-top:8px;margin-left:2px;margin-bottom:8px;margin-right:2px;">
+				<li data-theme="d" data-icon="false" >
+					<table id="mq_table">
+						<tr >
+							<td style="border-bottom:3px solid orange;">
+								<img src="images/src/paper.png">
+								<span>备注</span>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<textarea cols="40" rows="8" name="textarea" id="m_beifen" placeholder="要备注点什么呢"></textarea>
+							</td>
+						</tr>
+					</table>
+				</li>
+			</ul>
+		</div>	
+	</div>
+</div>

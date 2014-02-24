@@ -1,0 +1,495 @@
+<div data-role="page" data-theme="e" class="bg_page" id="jh_index_page">
+    <script type="text/javascript">
+        var day_temp = new Date();
+        var week_temp = new Date();
+        var today = new Date();
+        var month_temp = new Date();
+        var month_begin = new Date();
+        month_begin.addDays(-(month_begin.getDate() - 1));
+        month_temp.addDays(-(month_temp.getDate() - 1));
+        
+        $(document).one("pageinit", function(){
+            document.addEventListener("deviceready", onDeviceReady, false);
+            $("#week_list").show();
+            $("#control_week").show();
+            $("#month_list").hide();
+            $("#control_month").hide();
+            $("#day_list").hide();
+            $("#control_day").hide();
+            
+            list_by_day(today);
+            list_by_week(today);
+            list_by_month(month_begin);
+            
+            $("#day").on("vclick", function(){
+                //alert("ok");
+                day_event();
+            });
+            $("#week").on("vclick", function(){
+                //alert("ok");
+                week_event();
+            });
+            $("#month").on("vclick", function(){
+                //alert("ok");
+                month_event();
+            });
+            
+            $("#control_day").find("a[data-iconpos='left']").on("vclick", function(){
+                //alert("ok");
+                last_day();
+            });
+            $("#control_day").find("a[data-iconpos='right']").on("vclick", function(){
+                //alert("ok");
+                next_day();
+            });
+            
+            $("#control_week").find("a[data-iconpos='left']").on("vclick", function(){
+                //alert("ok");
+                last_week();
+            });
+            $("#control_week").find("a[data-iconpos='right']").on("vclick", function(){
+                //alert("ok");
+                next_week();
+            });
+            
+            $("#control_month").find("a[data-iconpos='left']").on("vclick", function(){
+                //alert("ok");
+                last_month();
+            });
+            $("#control_month").find("a[data-iconpos='right']").on("vclick", function(){
+                //alert("ok");
+                next_month();
+            });
+            
+            $(".cancle").click(function(){
+                $(".choice").hide();
+                closeBg();
+            });
+            
+            $("#synchronize").on("vclicl", function(){
+                var login = ssenvoyget("login");
+                if (login!="true") {
+                    var onConfirm = function(buttontext){
+                        if (buttontext == 1) {
+                            $("#jh_setting").hide();
+                            closeBg();
+                            $.mobile.changePage("../lwm/login.html", {
+                                transition: "pop"
+                            });
+                        }
+                        else {
+                            $("#jh_setting").hide();
+                            closeBg();
+                            return;
+                        }
+                    }
+                    navigator.notification.confirm('你还未登陆？', onConfirm, '确认信息', '确认,取消');
+                }
+                else {
+                    var personinfo = stringtojson(ssenvoyget("personinfo"));
+                    synchronize("jh_download", personinfo.email);
+                    $("#jh_setting").hide();
+                    closeBg();
+                }
+                
+                
+                
+            });
+            
+            $("#clear_event").on("vclick", function(){
+                //ssenvoyremove("event_of_week");
+                ///ssenvoyremove("event_of_beiwang");
+                var event_of_week = ssenvoyget("event_of_week");
+                if (event_of_week != "" && event_of_week != null) {
+                    event_of_week = To_Json(stringtojson(event_of_week));
+                    for (var i = 0; i < event_of_week.length; i++) {
+                        event_of_week[i].delflag = 1;
+                    }
+                    
+                    Str_event = jsontostring(To_String(event_of_week));
+                    ssenvoyset("event_of_week", Str_event);
+                    $("#day_list").empty();
+                    $("#week_list").empty();
+                    $("#month_list").empty();
+                    //$("#day_list").listview("refresh");
+                
+                }
+                
+                var event_of_beiwang = ssenvoyget("event_of_beiwang");
+                
+                if (event_of_beiwang != "" && event_of_beiwang != null) {
+                    event_of_beiwang = To_Json(stringtojson(event_of_beiwang));
+                    for (var i = 0; i < event_of_beiwang.length; i++) {
+                        event_of_beiwang[i].delflag = 1;
+                    }
+                    
+                    Str_beiwang = jsontostring(To_String(event_of_beiwang));
+                    ssenvoyset("event_of_week", Str_beiwang);
+                }
+                
+                $("#jh_setting").hide();
+                closeBg();
+            });
+        });
+        
+        function onDeviceReady(){
+            document.addEventListener("menubutton", MenuButton, false);
+        }
+        
+        function MenuButton(){
+            if ($.mobile.activePage.is("#jh_index_page")) {
+                showBg();
+                $("#jh_setting").show();
+            }
+            
+        }
+        
+        function day_event(){
+        
+            if (day_temp.format("yyyy/MM/dd") != today.format("yyyy/MM/dd")) {
+                list_by_day(today);
+            }
+            
+            day_temp = new Date();
+            $("#week_list").hide();
+            $("#month_list").hide();
+            $("#day_list").show();
+            $("#control_week").hide();
+            $("#control_month").hide();
+            $("#control_day").show();
+            
+            
+            $("#day").addClass('ui-btn-active');
+            $("#week").removeClass('ui-btn-active');
+            $("#month").removeClass('ui-btn-active');
+        }
+        
+        function week_event(){
+            if (week_temp.format("yyyy/MM/dd") != today.format("yyyy/MM/dd")) {
+                list_by_week(today);
+            }
+            
+            week_temp = new Date();
+            $("#week_list").show();
+            $("#month_list").hide();
+            $("#day_list").hide();
+            
+            $("#control_week").show();
+            $("#control_month").hide();
+            $("#control_day").hide();
+            
+            $("#week").addClass('ui-btn-active');
+            $("#day").removeClass('ui-btn-active');
+            $("#month").removeClass('ui-btn-active');
+            
+        }
+        
+        function month_event(){
+            if (month_begin.format("yyyy/MM/dd") != month_temp.format("yyyy/MM/dd")) {
+                list_by_month(month_begin);
+            }
+            
+            //alert(month_temp.toString());
+            
+            month_temp = new Date();
+            month_temp.addDays(-(month_temp.getDate() - 1));
+            $("#week_list").hide();
+            $("#month_list").show();
+            $("#day_list").hide();
+            
+            $("#control_week").hide();
+            $("#control_month").show();
+            $("#control_day").hide();
+            $("#week").removeClass('ui-btn-active');
+            $("#day").removeClass('ui-btn-active');
+            $("#month").addClass('ui-btn-active');
+        }
+        
+        
+        function last_day(){
+            day_temp.addDays(-1);
+            $("#day_list").empty();
+            
+            list_by_day(day_temp);
+        }
+        
+        function next_day(){
+            day_temp.addDays(1);
+            $("#day_list").empty();
+            
+            list_by_day(day_temp);
+        }
+        
+        function last_week(){
+            week_temp.addWeeks(-1);
+            //alert(week_temp.toDateString());
+            
+            $("#week_list").empty();
+            
+            list_by_week(week_temp);
+            
+            
+        }
+        
+        function next_week(){
+            week_temp.addWeeks(1);
+            //alert(week_temp.toDateString());
+            
+            $("#week_list").empty();
+            
+            list_by_week(week_temp);
+        }
+        
+        function last_month(){
+            month_temp.addMonths(-1);
+            
+            //alert(month_temp.getFullYear()+" "+month_temp.getMonth());
+            $("#month_list").empty();
+            
+            list_by_month(month_temp);
+        }
+        
+        function next_month(){
+            month_temp.addMonths(1);
+            
+            //alert(month_temp.getFullYear()+" "+month_temp.getMonth());
+            $("#month_list").empty();
+            
+            list_by_month(month_temp);
+        }
+        
+        
+        function list_by_day(day){
+            //day = new Date(day);
+            //var event_of_week = JSON.parse(ssenvoyget("event_of_week"));
+            var isnull = 0;
+            if (ssenvoyget("event_of_week") != null) {
+                var event_of_week = To_Json(stringtojson(ssenvoyget("event_of_week")));
+            }
+            else {
+                var event_of_week = null;
+            }
+            
+            if (event_of_week != null && event_of_week != "") {
+                var event_detail = event_of_week;
+                for (var i = 0; i < event_detail.length; i++) {
+                    var date = new Date(event_detail[i].start_time);
+                    if (day.format("yyyy/MM/dd") == date.format("yyyy/MM/dd") && event_detail[i].delflag != 1) {
+                        isnull++;
+                        if (isnull == 1) {
+                            $("#day_list").append("<li data-role=\"list-divider\">" + day.format("yyyy/MM/dd") + "</li>");
+                        }
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        var span = document.createElement("span");
+                        li.setAttribute("data-theme", event_of_week[i].data_theme);
+                        span.style.fontSize = "smaller";
+                        a.setAttribute("href", "event.html?id=1&position=" + i);
+                        //    a.setAttribute("data-ajax", "false");
+                        
+                        a.innerHTML = "<p style=\"font-size:20px;\">" + event_of_week[i].event_name + "   <span style='font-size:15px;color:gray'>(" + event_of_week[i].event_category + ")</span>" + "</p>";
+                        a.setAttribute("id", i);
+                        
+                        span.innerHTML = event_of_week[i].start_time + "···" + event_of_week[i].over_time;
+                        a.appendChild(span);
+                        li.appendChild(a);
+                        
+                        // li.appendChild(span);
+                        var element = document.getElementById("day_list");
+                        element.appendChild(li);
+                        
+                        $("#day_list").listview('refresh');
+                        
+                    }
+                    
+                }
+            }
+        }
+        
+        
+        function list_by_week(day){
+        
+        
+        
+            var year = day.getFullYear();
+            var month = day.getMonth() + 1;
+            var day_date = day.getDate();
+            var week_begin = getWeekBegin(year, month, day_date);
+            var week_end = getWeekEnd(year, month, day_date);
+            var isnull = 0;
+            
+            //   var event_of_week = JSON.parse(ssenvoyget("event_of_week"));
+            //var event_of_week = To_Json(stringtojson(ssenvoyget("event_of_week")));
+            if (ssenvoyget("event_of_week") != null) {
+                var event_of_week = To_Json(stringtojson(ssenvoyget("event_of_week")));
+            }
+            else {
+                var event_of_week = null;
+            }
+            
+            if (event_of_week != null && event_of_week != "") {
+                var event_detail = event_of_week;
+                for (var i = 0; i < event_detail.length; i++) {
+                    var date = new Date(event_detail[i].start_time);
+                    
+                    if (compareDate(date.format("yyyy/MM/dd"), week_begin) >= 0 && compareDate(date.format("yyyy/MM/dd"), week_end) <= 0 && event_detail[i].delflag != 1) {
+                        isnull++;
+                        if (isnull == 1) {
+                            $("#week_list").append("<li data-role=\"list-divider\">" + week_begin + "-" + week_end + "</li>");
+                        }
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        var span = document.createElement("span");
+                        li.setAttribute("data-theme", event_of_week[i].data_theme);
+                        span.style.fontSize = "smaller";
+                        a.setAttribute("href", "event.html?id=1&position=" + i);
+                        //    a.setAttribute("data-ajax", "false");
+                        
+                        a.innerHTML = "<p style=\"font-size:20px;\">" + event_of_week[i].event_name + "   <span style='font-size:15px;color:gray'>(" + event_of_week[i].event_category + ")</span>" + "</p>";
+                        a.setAttribute("id", i);
+                        
+                        span.innerHTML = event_of_week[i].start_time + "···" + event_of_week[i].over_time;
+                        a.appendChild(span);
+                        li.appendChild(a);
+                        
+                        // li.appendChild(span);
+                        var element = document.getElementById("week_list");
+                        element.appendChild(li);
+                        $("#week_list").listview('refresh');
+                    }
+                }
+            }
+            
+            
+        }
+        
+        function list_by_month(monthbegin){
+        
+            var isnull = 0;
+            if (ssenvoyget("event_of_week") != null) {
+                var event_of_week = To_Json(stringtojson(ssenvoyget("event_of_week")));
+            }
+            else {
+                var event_of_week = null;
+            }
+            if (event_of_week != null && event_of_week != "") {
+                var event_detail = event_of_week;
+                for (var i = 0; i < event_detail.length; i++) {
+                    var date = new Date(event_detail[i].start_time);
+                    //alert(date.getMonth()+" "+date.getFullYear());
+                    if (monthbegin.getFullYear() == date.getFullYear() && monthbegin.getMonth() == date.getMonth() && event_detail[i].delflag != 1) {
+                        isnull++;
+                        if (isnull == 1) {
+                            $("#month_list").append("<li data-role=\"list-divider\">" + monthbegin.format("yyyy/MM") + "</li>");
+                        }
+                        var li = document.createElement("li");
+                        var a = document.createElement("a");
+                        var span = document.createElement("span");
+                        li.setAttribute("data-theme", event_of_week[i].data_theme);
+                        span.style.fontSize = "smaller";
+                        a.setAttribute("href", "event.html?id=1&position=" + i);
+                        a.innerHTML = "<p style=\"font-size:20px;\">" + event_of_week[i].event_name + "   <span style='font-size:15px;color:gray'>(" + event_of_week[i].event_category + ")</span>" + "</p>";
+                        a.setAttribute("id", i);
+                        
+                        span.innerHTML = event_of_week[i].start_time + "···" + event_of_week[i].over_time;
+                        a.appendChild(span);
+                        li.appendChild(a);
+                        //li.appendChild(span);
+                        var element = document.getElementById("month_list");
+                        element.appendChild(li);
+                        
+                        $("#month_list").listview('refresh');
+                    }
+                    
+                }
+            }
+        }
+    </script>
+    <style>    
+        .choice {
+            position: absolute;
+            padding: 10px 25px;
+            display: none;
+            left: 0px;
+            right: 0px;
+            bottom: 0px;
+            height: 30%;
+            z-index: 1001;
+            border-radius: 8px 8px 0px 0px;
+            border-color: rgba(0, 0, 0, .3);
+            background: -webkit-gradient(linear, left top, left bottom, from(rgba(0, 0, 0, 0.8)),
+                                                                                    		to(rgba(0, 0, 0, 0.8)), color-stop(0.6, rgba(0, 0, 0, 0.2)));
+            }
+			
+			.fullbg {
+            	background: rgba(0, 0, 0, 0.5);
+            	display: none;
+            	z-index:1000;
+            	position: absolute;
+            	left: 0px;
+            	top: 0px;
+            	width: 0px;
+            	height: 0px;
+            }
+                 
+			
+                                                            
+                                                    
+                                            
+                                    
+                            
+                    
+            
+    </style>
+    <div data-role="header" class="bg_header">
+        <a href="../index.html" data-icon="back">返回</a>
+        <h1>事件列表</h1>
+        <a href="add.html" data-role="button" data-icon="Plus" data-transition="slideup">添加</a>
+    </div>
+    <div class="fullbg">
+    </div>
+    <div data-role="content">
+        <div data-role="controlgroup" data-type="horizontal" style="text-align: center" id="control">
+            <a href="#" data-role="button" id="day" data-theme="e">本天</a>
+            <a href="#" data-role="button" id="week" data-theme="e" class="ui-btn-active ">本周</a>
+            <a href="#" data-role="button" id="month" data-theme="e">本月</a>
+        </div>
+        <div data-role="controlgroup" data-type="horizontal" id="control_day" style="text-align: center">
+            <a href="#" data-role="button" data-icon="arrow-l" data-iconpos="left" data-theme="e" class="last">上一天</a>
+            <a href="#" data-role="button" data-icon="arrow-r" data-iconpos="right" data-theme="e" class="next">下一天</a>
+        </div>
+        <div data-role="controlgroup" data-type="horizontal" id="control_week" style="text-align: center">
+            <a href="#" data-role="button" data-icon="arrow-l" data-iconpos="left" data-theme="e" class="last">上周</a>
+            <a href="#" data-role="button" data-icon="arrow-r" data-iconpos="right" data-theme="e" class="next">下周</a>
+        </div>
+        <div data-role="controlgroup" data-type="horizontal" id="control_month" style="text-align: center">
+            <a href="#" data-role="button" data-icon="arrow-l" data-iconpos="left" data-theme="e" class="last">上月</a>
+            <a href="#" data-role="button" data-icon="arrow-r" data-iconpos="right" data-theme="e" class="next">下月</a>
+        </div>
+        <div id="event_day">
+            <ul data-role="listview" id="day_list" data-inset="true">
+            </ul>
+            <ul data-role="listview" id="week_list" data-inset="true">
+            </ul>
+            <ul data-role="listview" id="month_list" data-inset="true">
+            </ul>
+        </div>
+    </div>
+    <div data-role="footer" data-position="fixed" data-id="beiwang"  data-tap-toggle="false">
+        <div data-role="navbar" >
+            <ul>
+                <li>
+                    <a id="event_of_week"  href="jh_index.html" class="ui-btn-active ui-state-persist" >事件</a>
+                </li>
+                <li>
+                    <a id="event_of_beiwang"  href="beiwang.html" data-inline="true" >备忘</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="jh_setting" class="choice">
+        <input type="button" value="同步信息" id="synchronize"><input type="button" value="清除事件备忘" id="clear_event">
+        <br>
+        <input type="button" value="取消" data-theme="a" class="cancle">
+    </div>
+</div>

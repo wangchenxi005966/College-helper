@@ -1,0 +1,131 @@
+<div data-role="page" data-theme="e">
+    <script type="text/javascript">
+        $(document).one("pagebeforeshow", function(){
+            var request = GetRequest();
+            var id = request["id"];
+            var position = request["position"];
+            // alert(id);
+            if (id == 1) {
+                //var storage = window.localStorage;
+                //var event_of_week = JSON.parse(ssenvoyget("event_of_week"));
+                // alert(ssenvoyget("event_of_week"));
+                var event_of_week = To_Json(stringtojson(ssenvoyget("event_of_week")));
+                //var i = 0;
+                //while (event_of_week[i]) {
+                
+                ///var date=new  Date(event_of_week[i].start_time);
+                var event_date = position;
+                
+                //var now = new Date();
+                //if (event_date==date.format("yyyy/MM/dd")+ " " + date.format("hh:mm")) {
+                delete_pos = event_date;
+                
+                var li = document.createElement("li");
+                var li1 = document.createElement("li");
+                var li2 = document.createElement("li");
+                var li3 = document.createElement("li");
+                var li4 = document.createElement("li");
+                var li5 = document.createElement("li");
+                var li6 = document.createElement("li");
+                var li7 = document.createElement("li");
+                if (event_of_week[event_date].repeat == 0) 
+                    var repeat_number = "单次";
+                else 
+                    if (event_of_week[event_date].repeat == 1) 
+                        var repeat_number = "每天重复";
+                    else 
+                        if (event_of_week[event_date].repeat == 7) 
+                            var repeat_number = "每周重复";
+                
+                if (event_of_week[event_date].remind == "on") 
+                    var remind = "开启";
+                else 
+                    var remind = "关闭";
+                li.innerHTML = "<span>名称：" + " " + event_of_week[event_date].event_name + "</span>";
+                li3.innerHTML = "<span>类别：" + " " + event_of_week[event_date].event_category + "</span>";
+                li4.innerHTML = "<span>提醒：" + " " + remind + "</span>";
+                li1.innerHTML = "<span>开始时间：" + " " + event_of_week[event_date].start_time + "</span>";
+                li7.innerHTML = "<span>结束时间：" + " " + event_of_week[event_date].over_time + "</span>";
+                li2.innerHTML = "<span>参与人：" + " " + event_of_week[event_date].event_participator + "</span>";
+                li5.innerHTML = "<span>提前： 提前" + event_of_week[event_date].remind_time + "分钟提醒 </span>";
+                li6.innerHTML = "<span>重复：" + " " + repeat_number + "提醒</span>";
+                var element = document.getElementById("list_event");
+                
+                element.appendChild(li);
+                element.appendChild(li3);
+                element.appendChild(li1);
+                element.appendChild(li7);
+                
+                element.appendChild(li2);
+                element.appendChild(li4);
+                if (event_of_week[event_date].remind == "on") {
+                    element.appendChild(li5);
+                    element.appendChild(li6);
+                }
+            }
+            else 
+                if (id == 2) {
+                    //alert(id);
+                    
+                    var event_of_beiwang = To_Json(stringtojson(ssenvoyget("event_of_beiwang")));
+                    var event_date = position;
+                    var date = new Date(event_of_beiwang[event_date].start_time);
+                    var now = new Date();
+                    //if (event_date==date.format("yyyy/MM/dd")+ " " + date.format("hh:mm")) {
+                    delete_pos = event_date;
+                    var li = document.createElement("li");
+                    var li1 = document.createElement("li");
+                    var li2 = document.createElement("li");
+                    var li3 = document.createElement("li");
+                    li.innerHTML = "<span style='display:block;width:100%;text-align:center;'>" + event_of_beiwang[event_date].event_name + "</span>";
+                    if (date > now) {
+                        var day = parseInt((date.getTime() - now.getTime()) / (1000 * 3600 * 24));
+                        var innerHTML = "<span style='display:block;width:100%;text-align:center;'>还有<font> " + day + " </font>天</span>";
+                    }
+                    else {
+                        var day = parseInt((now.getTime() - date.getTime()) / (1000 * 3600 * 24));
+                        var innerHTML = "<span style='display:block;width:100%;text-align:center;'>已经<font> " + day + " </font>天</span>";
+                    }
+                    li3.innerHTML = innerHTML;
+                    li1.innerHTML = "<span style='display:block;width:100%;text-align:center;'>" + event_of_beiwang[event_date].start_time + "</span>";
+                    if (event_of_beiwang[event_date].remarks != "") 
+                        var remarks = "<span style='display:block;width:100%;text-align:center;'>" + event_of_beiwang[event_date].remarks + "</span>";
+                    else 
+                        var remarks = "<span style='display:block;width:100%;text-align:center;'>" + "无备注" + "</span>";
+                    li2.innerHTML = remarks;
+                    var element = document.getElementById("list_event");
+                    element.appendChild(li);
+                    element.appendChild(li3);
+                    element.appendChild(li1);
+                    element.appendChild(li2);
+                    
+                }
+            $("#list_event").listview('refresh');
+            
+            $("#event_delete").on("vclick",function()
+			{
+				Delete(position);
+			});
+        });
+    </script>
+    <style>
+        #list span {
+            font-family: 华文新魏;
+        }
+        
+        font {
+            color: red;
+            font-size: 50px;
+        }
+    </style>
+    <div data-role="header">
+        <a data-role="button" onclick="Return()" data-icon="back">返回</a>
+        <h3>每天事项</h3>
+        <a data-role="button" data-icon="Plus" onclick="edit()">编辑</a>
+    </div>
+    <div data-role="content">
+        <ul data-role="listview" data-inset="true" id="list_event" data-theme="e">
+        </ul>
+        <a data-role="button" id="event_delete" data-theme="e">删除</a>
+    </div>
+</div>

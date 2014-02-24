@@ -1,0 +1,147 @@
+<div data-role="page">
+    <style type="text/css">
+        .content-head {
+            margin-top: 0px;
+            padding: 0px;
+            background: url(image/background.jpg);
+            height: 90px;
+            width: 100%;
+        }
+        
+        .circle {
+            width: 70px;
+            height: 75px;
+            -webkit-border-radius: 10px;
+            border-radius: 10px;
+        }
+        
+        .showtext {
+            border: none;
+            text-align: left;
+            color: blue;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            background: #eee;
+            font-size: 15px;
+            font-weight: bold;
+        }
+        
+        .text_label {
+            color: gray;
+            font-size: 15px;
+        }
+        
+        .my_a {
+            border: none;
+            text-align: left;
+            margin: 0px;
+            padding: 0px;
+            width: 100%;
+            height: 100%;
+            background: #eee;
+            font-size: 17px;
+        }
+        
+        .spanstyle {
+            width: 100%;
+            height: 38px;
+            display: block;
+        }
+    </style>
+    <script type="text/javascript">
+        $(document).one("pageinit", function(){
+            //获取个人信息
+            //alert("test");
+            var personinfo = ssenvoyget("personinfo");
+            personinfo = stringtojson(personinfo);
+            
+            if (personinfo.head_sculpture != null && personinfo.head_sculpture != "") {
+                var largeImage = document.getElementById('head_sculpture_1');
+                largeImage.style.display = 'block';
+                //largeImage.src = imageURI;
+                largeImage.src = personinfo.head_sculpture + "?" + (new Date()).getTime();
+            }
+            
+            $("#name").text(personinfo.username);
+            
+            var sex = personinfo.sex == null ? "" : personinfo.sex;
+			$("#sex_age").text(sex);
+            var age = "";
+            if (personinfo.birthday != null && personinfo.birthday != "") {
+                var birthday = new Date(personinfo.birthday);
+                var now = new Date();
+                age = now.getFullYear() - birthday.getFullYear();
+				$("#sex_age").text(sex+" "+age+"岁");
+                var birthday_li_html = CovToLi("生日", personinfo.birthday);
+                $("#info_list").append(birthday_li_html);
+            }
+            //alert(sex+age);
+            /*if (age == "" || age == null) {
+                var ageinfo = "";
+            }
+            else {
+                var ageinfo = age + "岁";
+            }*/
+            //$("#sex_age").text(sex + " " + ageinfo);
+            /*if(sex!=null&&sex!=""&&age!=null&&age!="")
+             {
+             $("#sex_age").text(sex+" "+age+"岁");
+             }*/
+            $("#email").text(personinfo.email);
+            
+            if (personinfo.school != null && personinfo.school != "") {
+                var school_li_html = CovToLi("学校", personinfo.school);
+                $("#info_list").append(school_li_html);
+            }
+            
+            if (personinfo.college != null && personinfo.college != "") {
+                var college_li_html = CovToLi("学院", personinfo.college);
+                $("#info_list").append(college_li_html);
+            }
+            
+            if (personinfo.major != null && personinfo.major != "") {
+                var major_li_html = CovToLi("专业", personinfo.major);
+                $("#info_list").append(major_li_html);
+            }
+            
+            $("#info_list").listview("refresh");
+            
+        });
+        
+    </script>
+    <div data-role="header">
+        <a href="setting.html" data-icon="back">返回</a>
+        <h3>我的资料</h3>
+    </div>
+    <div class="content-head" align="center">
+        <div class="ui-grid-c" style="padding-top:50px;height:80px;">
+            <div class="ui-block-a" style="width:25%;height:100%;padding:2px;">
+                <img src="image/default.png" class="circle" id="head_sculpture_1">
+            </div>
+            <div class="ui-block-b" style="width:75%;text-align:left;font-weight:bold;color:black;height:100%;padding:2px;">
+                <span class="spanstyle" style="font-weight:bold;font-size:20px;line-height:38px;" id="name"></span>
+                <span class="spanstyle" style="font-weight:bold;font-size:15px;color:blue;line-height:38px;" id="sex_age"></span>
+            </div>
+        </div>
+    </div>
+    <div data-role="content" style="margin-top:35px;">
+        <ul data-role="listview" data-inset="true" data-inline="true" id="info_list">
+            <li data-role="fieldcontain">
+                <div class="ui-grid-c">
+                    <div class="ui-block-a" style="width:25%;">
+                        <label class="text_label">
+                            账号
+                        </label>
+                    </div>
+                    <div class="ui-block-b" style="width:75%;text-align:left;font-weight:bold;color:black">
+                        <p data-role="none" id="email" class="showtext">
+                            wayneislwm@gmail.com
+                        </p>
+                    </div>
+                </div>
+            </li>
+        </ul>
+        <a data-role="button" href="info_edit.html" data-theme="a">编辑资料</a>
+    </div>

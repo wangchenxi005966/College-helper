@@ -1,0 +1,128 @@
+<meta charset="utf-8">
+<div data-role="page" id="m_food_order">
+	<script type="text/javascript">
+		//临时加进去的
+		//window.localStorage.setItem("address_choosed","学生公寓5号楼");
+		$("#m_food_order").on("pageinit",function()
+		{
+			$("ul[id=show_order_ul] li").remove();
+			$("#m_food_order").page();
+			$("#show_order_ul").listview('refresh');
+			var title=ssenvoyget("shop_owner")+"订单";
+			var order_str="="+title+"=";//短信发送内容
+			var price=0;//总价钱
+			var food_order=stringtojson(ssenvoyget("food_order"));
+			$.each(food_order,function(infoIndex,info){
+				info=stringtojson(info);
+				order_str+=info["name"]+info["amount"]+"份;";
+				price+=info["amount"]*info["price"];
+				$("#show_order_ul").append('<li data-theme="c" data-icon="false" '+
+					'onclick="m_set_price(\''+info["name"]+'\',\''+info["price"]+'\',\''+info["amount"]+'\')">' +
+					'<a href="m_food_modify.html" data-transition="slide" id="choosed">' +
+					 '<table style="width:100%;margin-top:-10px;padding:0px">' +
+					'<tr>' +
+					'<td style="text-align:left;font-size:18px">' + info["name"] +
+					'</td><td style="text-align:right;font-size:14px;color:red" >'+info["amount"]+'份'+
+					'</td></tr><tr>' +
+					'<td style="text-align:left;font-size:14px;color:gray">' + info["price"]+'元/份'+
+					'</td><td style="text-align:right;font-size:17px;color:green">'+'共计：'+info["amount"]*info["price"]+"元"+
+					'</td></tr></table></a></li>'); 
+				info=JSON.stringify(info);  
+			});
+			$("#m_food_order").page();
+        	$("#show_order_ul").listview('refresh');
+        	$("#food_title").html(title);
+        	$("#show_price").html(price+"元");
+			$("#show_address").html(ssenvoyget("address_choosed"));
+			$("#message").click(function()
+        	{
+				if(ssenvoyget("address_choosed")==""||ssenvoyget("address_choosed")==null)
+				{
+					alert("请设置外卖接收地址");
+					goTo("m_food_address.html");
+				}
+				else{
+					var messagenum="sms:+86"+ssenvoyget("shop_phone")+"?body="+order_str+"    送往："+ssenvoyget("address_choosed");
+					location.href=messagenum;
+				}
+        	});
+        	
+		});
+		$("#m_food_order").ready(function(){
+			$("#m_cancel").click(function()
+        	{
+        		ssenvoyremove("food_order");
+        		goTo("../index.html");
+        	});
+        	$("#phone").click(function()
+        	{
+        		var phonenum="tel:+86"+ssenvoyget("shop_phone");
+        		location.href = phonenum;
+        	});
+		});
+		function m_set_price(name,price,amount)
+		{
+			ssenvoyset("foodname",name);
+			ssenvoyset("price",price);
+			ssenvoyset("amount",amount);
+		}
+	</script>
+	<style type="text/css">
+		.ui-navbar-custom2 .ui-btn .ui-btn-inner { font-size: 11px!important; padding-top: 32px!important; padding-bottom: 0px!important; }
+		.ui-navbar-custom2 .ui-btn .ui-icon { width: 30px!important; height: 20px!important; margin-left: -15px!important; box-shadow: none!important; -moz-box-shadow: none!important; -webkit-box-shadow: none!important; -webkit-border-radius: none !important; border-radius: none !important; }
+		#phone .ui-icon { background:  url(images/src/phone.png) 50% 50% no-repeat; background-size: 32px 32px; }
+		#message .ui-icon { background:  url(images/src/email.png) 50% 50% no-repeat; background-size: 32px 32px; }
+	</style>
+	<div data-theme="a" data-role="header" data-position="fixed">
+		<h3 id="food_title">Header</h3>
+	</div>
+	<div data-role="content">
+		<div data-role="collapsible-set" style="margin-top: 20px;">
+                <div data-role="listview" data-collapsed="false">
+                    <ul data-role="listview" data-divider-theme="b" data-inset="false" >
+                        <li data-theme="c" data-icon="false"><a data-transition="slide" style="margin-left:10px">总价<span class="ui-li-aside"
+                            id="show_price" style="color:#977C00;padding-right:3%">0元</span> </a></li>
+                    </ul>
+                    <ul data-role="listview" data-divider-theme="b" data-inset="true" id="show_order_ul" style="margin-top:40px;margin-bottom:40px;margin-left: 10%;
+                        margin-right: 10%;">
+                    </ul>
+                    <ul data-role="listview" data-divider-theme="b" data-inset="false" style="margin-bottom:40px;">
+                        <li data-theme="c" data-icon="false"><a data-transition="slide" href="m_food_address.html" style="margin-left:10px"><span style="vertical-align:middle;">送往</span> <span class="ui-li-aside"
+                            id="show_address" style="padding-right:3%;color:#00EC00;text-align: right"></span> </a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="ui-grid-a">
+				<div class="ui-block-a">
+					<a data-role="button" data-direction="reverse" data-transition="slide"
+					data-theme="e" id="m_cancel">
+						取消订单
+					</a>
+				</div>
+				<div class="ui-block-b">
+					<a data-role="button" data-transition="slide" data-theme="e" 
+					id="m_add" href="m_food_list.html">
+						继续添加
+					</a>
+				</div>
+			</div>
+		</div>
+		<div data-theme="a" data-role="footer" class="ui-navbar-custom2" data-position="fixed">
+			<div data-role="navbar" class="ui-navbar-custom2" data-iconpos="top">
+				<ul>
+					<li>
+						<a data-transition="fade"  data-icon="custom" id="phone">
+							电话订单
+						</a>
+					</li>
+					<li>
+						<a data-transition="fade"  data-icon="custom" id="message">
+							短信订单
+						</a>
+					</li>
+				</ul>
+			</div>
+		</div>
+	</div>
+
+
